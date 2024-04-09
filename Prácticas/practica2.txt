@@ -1,0 +1,448 @@
+-- EJ 1:
+
+Demostrar las siguientes igualdades usando el principio de extensionalidad para pares y sumas:
+
+Sean las siguientes definiciones de funciones:
+
+- intercambiar (x,y) = (y,x)                {INT}
+- espejar (Left x) = Right x                {ESP_0}
+  espejar (Right x) = Left x                {ESP_1}
+- asociarI (x,(y,z)) = ((x,y),z)            {ASO_I}
+- asociarD ((x,y),z) = (x,(y,z))            {ASO_D}
+- flip f x y = f y x                        {FLIP}
+- curry f x y = f (x,y)                     {CURRY}
+- uncurry f (x,y) = f x y                   {UNCURRY}
+
+Demostrar las siguientes igualdades usando el principio de extensionalidad para pares y sumas:
+
+    -- ITEM I --
+
+Lo que quiero probar: ∀ p::(a,b) . intercambiar (intercambiar, p) = p
+
+Por inducción sobre pares basta probar que:
+∀x :: a. ∀y :: b. intercambiar (intercambiar (x,y)) = (x,y)
+
+Por def de {INT}:
+intercambiar (intercambiar (x,y)) = intercambiar (y,x)
+
+Por def de {INT}:
+intercambiar (y,x) = (x,y)
+                                                                        ■
+
+    -- ITEM II --
+
+Lo que quiero probar: ∀ p::(a,(b,c)) . asociarD (asociarI p) = p
+
+Por inducción sobre pares p basta probar que:
+∀x :: a. ∀t :: (b,c).  asociarD (asociarI (x,t)) = (x,t)
+
+Por inducción sobre pares t basta probar que:
+∀x :: a. ∀y :: b. ∀z :: c.  asociarD (asociarI (x,(y,z))) = (x,(y,z))
+
+Por def de {ASO_I}:
+asociarD (asociarI (x,(y,z))) = asociarD ((x,y),z)
+
+Por def de {ASO_D}:
+asociarD ((x,y),z) = (x,(y,z))
+                                                                        ■
+
+    -- ITEM III --
+
+Lo que quiero probar: ∀ p::Either a b . espejar (espejar p) = p
+
+Either solo tiene constructores base, por lo tanto, para hacer inducción estructural para either vamos a necesitar probar que nuestra propiedad vale para cada uno de nuestros dos constructores base.
+Por inducción sobre either basta probar que:
+
+Caso I: ∀Left x :: a.  espejar (espejar Left x) = Left x
+and
+Caso II: ∀Right x :: b.  espejar (espejar Right x) = Right x
+
+Veamos el caso I:
+
+    Por def de {ESP_0}:
+    espejar (espejar Left x) = espejar (Right x)
+
+    Por def de {ESP_1}:
+    espejar (Right x) = Left x
+
+    Por lo tanto vale el caso I.
+
+Veamos el caso II:
+
+    Por def de {ESP_1}:
+    espejar (espejar Right x) = espejar (Left x)
+
+    Por def de {ESP_0}:
+    espejar (Left x) = Right x
+
+    Por lo tanto vale el caso II.
+
+Los dos casos se cumplen como queríamos ver.
+                                                                        ■
+
+    -- ITEM IV --
+
+Lo que quiero probar: ∀ f::a->b->c . ∀ x::a . ∀ y::b . flip (flip f) x y = f x y
+
+Por def de {FLIP}:
+flip (flip f) x y = flip f y x
+
+Por def de {FLIP}:
+flip f y x = flip f x y
+                                                                        ■
+
+    -- ITEM V --
+
+Lo que quiero probar: ∀ f::a->b->c . ∀ x::a . ∀ y::b . curry (uncurry f) x y = f x y
+
+Por def de {CURRY}:
+curry (uncurry f) x y = uncurry f (x,y)
+
+Por def de {UNCURRY}:
+uncurry f (x,y) = f x y
+                                                                        ■
+
+
+-- EJ 2:  -- CONSULTAR!!!!
+
+Demostrar las siguientes igualdades utilizando el principio de extensionalidad funcional:
+
+    -- ITEM I --
+Lo que quiero probar: flip . flip = id
+
+Obervación: flip . flip = id :: (a->b->c) -> a->b->c
+
+Por extensionalidad funcional basta probar que:
+∀ f::a->b->c . (flip . flip) f = id f
+
+Por def de {(.)}:
+(flip . flip) f = flip (flip f)
+
+Por extensionalidad funcional basta probar que:
+∀ x::a . ∀ y::b . flip (flip f) x y = id f x y
+
+Por def de {FLIP}:
+flip (flip f) x y = flip f y x  -- ojo con el orden. lo de adentro se debería ejecutar primero
+flip f no matchea con ninguna ecuación porque la def de flip usa los parametros de ella
+
+Por def de {FLIP}:
+flip f y x = f x y
+
+Por def de {ID}:
+f x y = id f x y
+
+-----------------------------------------------
+
+Lo que quiero probar: flip . flip = id
+
+Obervación: flip . flip = id :: (a->b->c) -> a->b->c
+
+Defino:
+flip :: (a->b->c) -> b->a->c
+flip f = (\x y -> f y x)                    {FLIP_\}
+
+id :: (a->b->c) -> a->b->c
+id f = (\x y -> f x y)                      {ID_\}
+
+Por extensionalidad funcional basta probar que:
+∀ f::a->b->c . (flip . flip) f = id f
+
+Por def de {(.)}:
+(flip . flip) f = flip (flip f)
+
+Por def de {FLIP_\}:
+= flip (\x y -> f y x)
+
+Por def de {FLIP_\}:
+= [\x y -> (\x' y' -> f y' x') y x]
+
+x' recibe como parametro y
+y' recibe como parametro x
+Por la ecuación de la lambda reduce a
+= [\x y -> f x y]
+
+Por def de {ID_\}:
+= id f
+                                                                        ■
+
+    -- ITEM II --
+
+Lo que quiero probar: ∀ f::(a,b)->c . uncurry (curry f) = f
+
+Por extensionalidad funcional basta probar que:
+∀ p::(a,b) . uncurry (curry f) p = f p
+
+Por inducción sobre pares basta probar que:
+∀x :: a. ∀y :: b. uncurry (curry f) (x,y) = f (x,y)
+
+Por def de {UNCURRY}:
+uncurry (curry f) (x,y) = curry f x y
+
+Por def de {CURRY}:
+curry f x y = f (x,y)
+                                                                        ■
+
+    -- ITEM III --
+
+Lo que quiero probar: flip const = const id
+
+Por extensionalidad funcional basta probar que:
+∀x :: a. ∀y :: b. flip const x y = const id x y
+
+LHS:
+Por def de {FLIP}:
+flip const x y = const y x
+
+Por def de {CONST}:
+const y x = y
+
+Veamos el otro lado de la igualdad.  Comentario, Haskell reduce así: const id x y = (const id x) y = id y = y
+
+RHS:
+Por definición de {CONST}:
+const id x y = id y
+
+Por definición de {ID}:
+id y = y
+                                                                        ■
+
+    -- ITEM IV --
+
+Lo que quiero probar: ∀ f::a->b . ∀ g::b->c . ∀ h::c->d . ((h . g) . f) = (h . (g . f))
+con la definición usual de la composición: (.) f g x = f (g x)
+
+Por extensionalidad funcional basta probar que:
+∀x :: a. ((h . g) . f) x = (h . (g . f)) x
+
+Por cómodidad vamos a reescribirlo con notación prefija:
+
+qvq: ∀x :: a. (.) ((.) h g) f x = (.) h ((.) g f) x
+
+LHS:
+Por definición de {(.)}:
+(.) ((.) h g) f x = ((.) h g) (f x)
+
+Por definición de {(.)}:
+((.) h g) (f x) = h (g (f x))
+
+
+RHS:
+Por definición de {(.)}:
+(.) h ((.) g f) x = h (((.) g f) x)
+
+Por definición de {(.)}:
+h (((.) g f) x) = h ((g (f x)))  -- consultar este paso! debería ser válido por la evaluación parcial
+                                                                        ■
+
+
+
+-- EJ 3:
+
+Considerar las siguientes funciones:
+
+length :: [a] -> Int
+{L0} length [] = 0
+{L1} length (x:xs) = 1 + length xs
+
+duplicar :: [a] -> [a]
+{D0} duplicar [] = []
+{D1} duplicar (x:xs) = x : x : duplicar xs
+
+append :: [a] -> [a] -> [a]
+{A0} append [] ys = ys
+{A1} append (x:xs) ys = x : append xs ys
+
+(++) :: [a] -> [a] -> [a]
+{++} xs ++ ys = foldr (:) ys xs
+
+ponerAlFinal :: [a] -> a -> [a]
+{P0} ponerAlFinal x = foldr (:) (x:[])
+
+reverse :: [a] -> [a]
+{R0} reverse = foldl (flip (:)) []
+
+Demostrar las siguientes propiedades:
+
+    -- ITEM I --
+
+Lo que quiero probar: ∀ xs::[a] . length (duplicar xs) = 2 * length xs
+
+Por inducción estructural sobre la lista xs, basta con probar:
+
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P(x : xs)).
+
+Caso base:
+Queremos ver que: length (duplicar []) = 2 * length []
+
+LHS:
+Por definición de {D0}:
+length (duplicar []) = length []
+
+Por definición de {L0}:
+length [] = 0
+
+RHS:
+Por definición de {L0}:
+2 * length [] = 2 * 0 = 0
+
+=> Vale el caso base.
+
+Paso inductivo:
+Queremos ver que ∀x :: a. ∀xs :: [a]. length (duplicar xs) = 2 * length xs  ⇒  length (duplicar (x:xs)) = 2 * length (x:xs).
+
+{HI}: length (duplicar xs) = 2 * length xs
+
+Queremos concluir que se cumple si se cumple la hipotesis inductiva, se cumple que: length (duplicar (x:xs)) = 2 * length (x:xs).
+
+LHS:
+Por definición {D1}:
+length (duplicar (x:xs)) = length (x : x : duplicar xs)
+
+Por definición {L1}:
+= 1 + length (x : duplicar xs)
+
+Por definición {L1}:
+= 1 + (1 + length (duplicar xs))
+
+Por {HI}:
+= 1 + (1 + (2 * length xs))
+
+RHS:
+Por definición {L1}:
+2 * length (x:xs) = 2 * (1 + length xs)
+
+Aplicando distributiva:
+= 2 + (2 * length xs)
+
+CONSULTA ¿
+puedo decir que:
+1 + (1 + (2 * length xs)) = 2 + (2 * length xs )
+??
+
+=> Vale el paso inductivo.
+
+Probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+    -- ITEM II --
+
+Lo que quiero probar: ∀ xs::[a] . ∀ ys::[a] . length (append xs ys) = length xs + length ys
+
+Vamos a hacer inducción sobre xs. Necesito ver que:
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P(x : xs)).
+
+Caso base:
+Queremos ver que: length (append [] ys) = length [] + length ys
+
+LHS:
+Por definición de {A0}:
+length (append [] ys) = length ys
+
+RHS:
+Por definición de {L0}:
+length [] + length ys = 0 + length ys = length ys
+
+=> Vale el caso base.
+
+Paso inductivo sobre xs:
+Queremos ver que ∀x :: a. ∀xs :: [a]. length (append xs ys) = length xs + length ys  ⇒  length (append (x:xs) ys) = length (x:xs) + length ys
+
+{HI}: length (append xs ys) = length xs + length ys
+
+Queremos concluir que se cumple si se cumple la hipotesis inductiva, se cumple que: length (append (x:xs) ys) = length (x:xs) + length ys.
+
+LHS:
+Por definición de {A1}:
+length (append (x:xs) ys) = length (x : append xs ys)
+
+Por definición de {L1}:
+= 1 + length (append xs ys)
+
+Por {HI}:
+= 1 + length xs + length ys
+
+RHS:
+Por definición de {L1}:
+length (x:xs) + length ys = 1 + length xs + length ys
+
+=> Vale el paso inductivo.
+
+Probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+    -- ITEM III --
+
+Lo que quiero probar: ∀ xs::[a] . ∀ f::(a->b) . length (map f xs) = length xs
+
+Ecuaciones extra que vamos a necesitar:
+{M0} map f [] = []
+{M1} map f (x : xs) = f x : map f xs
+
+Vamos a hacer inducción estructural sobre la lista xs. Necesitamos ver que se cumple:
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P(x : xs)).
+
+Caso base:
+Queremos ver que se cumple: ∀ f::(a->b) . length (map f []) = length []
+
+Por definición {M0}:
+length (map f []) = length []
+
+Por definición {L0}:
+length [] = 0
+
+=> Se cumple el caso base.
+
+Paso inductivo:
+Queremos ver que si se cumple ∀ x::a . ∀ xs:[a] . ∀ f::(a->b) . length (map f xs) = length xs ⇒ length (map f (x:xs)) = length (x:xs)  -- CONSULTAR CUANTIFICADORES!!!
+
+{HI}: length (map f xs) = length xs
+
+Queremos concluir que se cumple si se cumple la hipotesis inductiva, se cumple que: length (map f (x:xs)) = length (x:xs)
+
+LHS:
+Por definición {M1}:
+length (map f (x:xs)) = length (f x : map f xs)
+
+Por definición {L1}:
+1 + length (map f xs)
+
+Por {HI}:
+1 + length xs
+
+RHS:
+Por definición {L1}:
+length (x:xs) = 1 + length xs
+
+=> Se cumple el paso inductivo.
+
+Probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+    -- ITEM IV --
+
+Lo que quiero probar: Eq a => ∀ xs::[a] . ∀ p::a->Bool . ∀ e::a . elem e (filter p xs) ⇒ elem e xs
+
+-- consultar si usamos definiciónes con folds para el filter, no estaba definida en el enunciado
+
+
+    -- ITEM V --
+
+Lo que quiero probar: ∀ xs::[a] . ∀ x::a . length (ponerAlFinal xs x) = 1 + length xs
+
+Vamos a demostrarlo utilizando inducción estructural sobre la lista xs.
+
+Para ello vamos a necesitar probar:
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P(x : xs)).
+
+Caso base:
+
+Queremos ver que se cumple: length (ponerAlFinal [] x) = 1 + length []
+
+LHS:
+Por definición {P0}:
+length (ponerAlFinal [] x) = length (foldr (:) ([]:[]) x) = length (foldr (:) ([[]]) x) --SEGUIR
+
