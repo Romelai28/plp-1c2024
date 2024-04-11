@@ -1,0 +1,97 @@
+-- EJ 2:
+
+Demostrar las siguientes igualdades utilizando el principio de extensionalidad funcional:
+
+    -- ITEM I --
+Lo que quiero probar: flip . flip = id
+
+Obervación: flip . flip = id :: (a->b->c) -> a->b->c
+
+Por extensionalidad funcional basta probar que:
+∀ f::a->b->c . (flip . flip) f = id f
+
+Por def de {(.)}:
+(flip . flip) f = flip (flip f)
+
+Por extensionalidad funcional basta probar que:
+∀ x::a . ∀ y::b . flip (flip f) x y = id f x y
+
+Por def de {FLIP}:
+flip (flip f) x y = flip f y x
+
+Por def de {FLIP}:
+flip f y x = f x y
+
+Por def de {ID}:
+f x y = id f x y
+                                                                        ■
+
+    -- ITEM II --
+
+Lo que quiero probar: ∀ f::(a,b)->c . uncurry (curry f) = f
+
+Por extensionalidad funcional basta probar que:
+∀ p::(a,b) . uncurry (curry f) p = f p
+
+Por inducción sobre pares basta probar que:
+∀x :: a. ∀y :: b. uncurry (curry f) (x,y) = f (x,y)
+
+Por def de {UNCURRY}:
+uncurry (curry f) (x,y) = curry f x y
+
+Por def de {CURRY}:
+curry f x y = f (x,y)
+                                                                        ■
+
+    -- ITEM III --
+
+Lo que quiero probar: flip const = const id
+
+Por extensionalidad funcional basta probar que:
+∀x :: a. ∀y :: b. flip const x y = const id x y
+
+LHS:
+Por def de {FLIP}:
+flip const x y = const y x
+
+Por def de {CONST}:
+const y x = y
+
+Veamos el otro lado de la igualdad.  Comentario, Haskell reduce así: const id x y = (const id x) y = id y = y
+
+RHS:
+Por definición de {CONST}:
+const id x y = id y
+
+Por definición de {ID}:
+id y = y
+                                                                        ■
+
+    -- ITEM IV --
+
+Lo que quiero probar: ∀ f::a->b . ∀ g::b->c . ∀ h::c->d . ((h . g) . f) = (h . (g . f))
+con la definición usual de la composición: (.) f g x = f (g x)
+
+Por extensionalidad funcional basta probar que:
+∀x :: a. ((h . g) . f) x = (h . (g . f)) x
+
+Por cómodidad vamos a reescribirlo con notación prefija:
+
+qvq: ∀x :: a. (.) ((.) h g) f x = (.) h ((.) g f) x
+
+LHS:
+Por definición de {(.)}:
+(.) ((.) h g) f x = ((.) h g) (f x)
+
+Por definición de {(.)}:
+((.) h g) (f x) = h (g (f x))
+
+
+RHS:
+Por definición de {(.)}:
+(.) h ((.) g f) x = h (((.) g f) x)
+
+Por definición de {(.)}:
+h (((.) g f) x) = h ((g (f x)))
+                                                                        ■
+                                                                        

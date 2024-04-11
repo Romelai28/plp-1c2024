@@ -1,0 +1,115 @@
+-- EJ 1:
+
+Demostrar las siguientes igualdades usando el principio de extensionalidad para pares y sumas:
+
+Sean las siguientes definiciones de funciones:
+
+- intercambiar (x,y) = (y,x)                {INT}
+- espejar (Left x) = Right x                {ESP_0}
+  espejar (Right x) = Left x                {ESP_1}
+- asociarI (x,(y,z)) = ((x,y),z)            {ASO_I}
+- asociarD ((x,y),z) = (x,(y,z))            {ASO_D}
+- flip f x y = f y x                        {FLIP}
+- curry f x y = f (x,y)                     {CURRY}
+- uncurry f (x,y) = f x y                   {UNCURRY}
+
+Demostrar las siguientes igualdades usando el principio de extensionalidad para pares y sumas:
+
+    -- ITEM I --
+
+Lo que quiero probar: ∀ p::(a,b) . intercambiar (intercambiar, p) = p
+
+Sea p::(a,b) arbitrario, veamos que vale intercambiar (intercambiar, p) = p
+
+Por extensionalidad sobre pares:
+∃x :: a. ∃y :: b. tales que p = (x,y), por lo tanto, basta probar que:
+
+intercambiar (intercambiar (x,y)) = (x,y)
+
+Por def de {INT}:
+intercambiar (intercambiar (x,y)) = intercambiar (y,x)
+
+Por def de {INT}:
+intercambiar (y,x) = (x,y)
+                                                                        ■
+
+    -- ITEM II --
+
+Lo que quiero probar: ∀ p::(a,(b,c)) . asociarD (asociarI p) = p
+
+Sea p::(a,(b,c)) arbirario, veamos que vale asociarD (asociarI p) = p
+
+Por extensionalidad sobre pares (p):
+∃x :: a. ∃t :: (b,c).  tales que p = (x,t), por lo tanto, basta probar que:
+asociarD (asociarI (x,t)) = (x,t)
+
+Por extensionalidad sobre pares (t):
+∃y :: b. ∃z :: c. tales que t = (y,z), por lo tanto, basta probar que:
+asociarD (asociarI (x,(y,z))) = (x,(y,z))
+
+Por def de {ASO_I}:
+asociarD (asociarI (x,(y,z))) = asociarD ((x,y),z)
+
+Por def de {ASO_D}:
+asociarD ((x,y),z) = (x,(y,z))
+                                                                        ■
+
+    -- ITEM III --
+
+Lo que quiero probar: ∀ p::Either a b . espejar (espejar p) = p
+
+Sea p::Either a b una suma arbitraria, veamos que vale espejar (espejar p) = p
+
+Por extensionalidad sobre sumas:
+| Caso 1. ó bien ∃x :: a. p = Left x
+| Caso 2. ó bien ∃y :: a. p = Right y
+
+Por lo tanto basta probar ambos casos por separado,
+Caso I: si ∃x :: a tal que p = Left x entonces espejar (espejar Left x) = Left x
+and
+Caso II: si ∃y :: a. p = Right y tal que p = Right y entonces espejar (espejar Right y) = Right y
+
+Veamos el caso I:
+
+    Por def de {ESP_0}:
+    espejar (espejar Left x) = espejar (Right x)
+
+    Por def de {ESP_1}:
+    espejar (Right x) = Left x
+
+    Por lo tanto vale el caso I.
+
+Veamos el caso II:
+
+    Por def de {ESP_1}:
+    espejar (espejar Right y) = espejar (Left y)
+
+    Por def de {ESP_0}:
+    espejar (Left y) = Right y
+
+    Por lo tanto vale el caso II.
+
+Los dos casos se cumplen como queríamos ver.
+                                                                        ■
+
+    -- ITEM IV --
+
+Lo que quiero probar: ∀ f::a->b->c . ∀ x::a . ∀ y::b . flip (flip f) x y = f x y
+
+Por def de {FLIP}:
+flip (flip f) x y = flip f y x
+
+Por def de {FLIP}:
+flip f y x = flip f x y
+                                                                        ■
+
+    -- ITEM V --
+
+Lo que quiero probar: ∀ f::a->b->c . ∀ x::a . ∀ y::b . curry (uncurry f) x y = f x y
+
+Por def de {CURRY}:
+curry (uncurry f) x y = uncurry f (x,y)
+
+Por def de {UNCURRY}:
+uncurry f (x,y) = f x y
+                                                                        ■

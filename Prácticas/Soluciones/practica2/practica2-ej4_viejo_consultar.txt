@@ -1,0 +1,172 @@
+-- EJ 4:
+
+Demostrar las siguientes propiedades utilizando inducción estructural sobre listas y el principio de extensionalidad.
+
+Considerar las siguientes funciones:
+
+length :: [a] -> Int
+{L0} length [] = 0
+{L1} length (x:xs) = 1 + length xs
+
+duplicar :: [a] -> [a]
+{D0} duplicar [] = []
+{D1} duplicar (x:xs) = x : x : duplicar xs
+
+append :: [a] -> [a] -> [a]
+{A0} append [] ys = ys
+{A1} append (x:xs) ys = x : append xs ys
+
+(++) :: [a] -> [a] -> [a]
+{++} xs ++ ys = foldr (:) ys xs
+
+ponerAlFinal :: [a] -> a -> [a]
+{P0} ponerAlFinal x = foldr (:) (x:[])
+
+reverse :: [a] -> [a]
+{R0} reverse = foldl (flip (:)) []
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+{FOLDL0} foldl f ac [] = ac
+{FOLDL1} foldl f ac (x : xs) = foldl f (f ac x) xs
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+{FOLDR0} foldr f z [] = z
+{FOLDR1} foldr f z (x : xs) = f x (foldr f z xs)
+
+
+    -- ITEM I --
+
+DEMOSTRAR: reverse . reverse = id :: [a] -> [a]
+
+Por el prinicipio de extensionalidad funcional, basta ver que:
+
+∀l :: [a] . reverse . reverse l = id l
+
+Por def de {(.)}:
+reverse . reverse l = reverse (reverse l)
+
+Por def de {ID}:
+id l = l
+
+---------------------------------------------------------------
+Por inducción estructural sobre listas basta con ver que:
+
+1. Caso base, P([]) es verdadero.
+2. Caso inductivo, ∀x :: a . ∀xs :: [a] . P(xs) => P((x:xs))
+
+Siendo la propiedad P(l) := reverse (reverse l) = l
+---------------------------------------------------------------
+
+| Caso base:
+
+Queremos ver que: reverse (reverse []) = []
+
+Por def de {R0}:
+reverse (reverse []) = reverse (foldl (flip (:)) [] [])
+
+Por def de {FOLDL0}:
+= reverse []
+
+Por def de {R0}:
+= foldl (flip (:)) [] []
+
+Por def de {FOLDL0}:
+= []
+
+Bien, se cumple el caso base.
+
+| Paso inductivo:
+
+Nuestra hipotesis inductiva es que vale P(xs), es decir:
+{HI}: reverse (reverse xs) = xs
+
+LHS:
+= reverse (foldl (flip (:)) [] xs)
+
+= foldl (flip (:)) [] (foldl (flip (:)) [] xs)
+
+Queremos ver que se cumple la implicación, si se cumple la hipotesis inductiva entonces se cumple que: reverse (reverse (x:xs)) = (x:xs)
+
+Por definición de {R0}:
+reverse (reverse (x:xs)) = reverse (foldl (flip (:)) [] (x:xs))
+
+Por definición de {FOLDL1}:
+= reverse (foldl (flip (:)) ((flip (:)) [] x) xs)
+
+Por definición de {FLIP}:
+= reverse (foldl (flip (:)) ((:) x []) xs)
+
+Por definición de {(:)}:
+= reverse (foldl (flip (:)) [x] xs)
+
+Por definición de {R0}:
+= foldl (flip (:)) [] (foldl (flip (:)) [x] xs)
+
+
+flip f x y = f y x
+
+{FOLDL0} foldl f ac [] = ac
+{FOLDL1} foldl f ac (x : xs) = foldl f (f ac x) xs
+
+{R0} reverse = foldl (flip (:)) []
+
+
+Por definición de {R0}:
+reverse (reverse l)  = foldl (flip (:)) [] (reverse l)
+
+por prop (diapo teorica):
+= foldr (:) [] l
+
+TEOREMA:
+= l
+
+TEOREMA:
+
+∀l :: [a] . foldr (:) [] l = l
+
+---------------------------------------------------------------
+Por inducción estructural sobre lista, basta probar que:
+
+1. Caso base, P([]) se cumple
+2. Paso inductivo,  ∀x :: a . ∀xs :: [a] . P((xs)) => P((x:xs))
+
+P(l) := foldr (:) [] l = l
+---------------------------------------------------------------
+
+| Caso base:
+
+Queremos ver que: foldr (:) [] [] = []
+
+Por def de {FOLDR0}:
+foldr (:) [] [] = []
+
+Se cumple el caso base.
+
+| Paso inductivo:
+
+{HI}: foldr (:) [] xs = xs
+
+Asumiendo la hipotesis inductiva, queremos ver que se cumple: foldr (:) [] (x:xs) = (x:xs)
+
+Por definición de {FOLDR1}:
+foldr (:) [] (x:xs) = (:) x (foldr (:) [] xs)
+
+Por {HI}:
+= (:) x xs
+
+Por {(:)}:
+= (x:xs)
+
+Se cumple el paso inductivo.
+
+Queda demostrado el teorema.
+                                                                        ■
+
+
+
+{FOLDR0} foldr f z [] = z
+{FOLDR1} foldr f z (x : xs) = f x (foldr f z xs)
+
+Teorema diapo teorica:
+Si f :: a -> b -> b, z :: b, xs :: [a], entonces:
+foldr f z xs = foldl (flip f) z (reverse xs)

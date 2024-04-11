@@ -1,0 +1,91 @@
+-- EJ 4:
+
+Demostrar las siguientes propiedades utilizando inducción estructural sobre listas y el principio de extensionalidad.
+
+Relevante:
+
+reverse :: [a] -> [a]
+{R0} reverse = foldl (flip (:)) []
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+{FOLDL0} foldl f ac [] = ac
+{FOLDL1} foldl f ac (x : xs) = foldl f (f ac x) xs
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+{FOLDR0} foldr f z [] = z
+{FOLDR1} foldr f z (x : xs) = f x (foldr f z xs)
+
+[1] Propiedad diapo teorica:
+Si f :: a -> b -> b, z :: b, xs :: [a], entonces:
+foldr f z xs = foldl (flip f) z (reverse xs)
+
+[2] Teorema:
+∀l :: [a] . foldr (:) [] l = l
+
+
+    -- ITEM I --
+
+DEMOSTRAR: reverse . reverse = id :: [a] -> [a]
+
+Por el prinicipio de extensionalidad funcional, basta ver que:
+
+∀l :: [a] . reverse . reverse l = id l
+
+Por def de {(.)}:
+reverse . reverse l = reverse (reverse l)
+
+Por definición de {R0}:
+reverse (reverse l)  = foldl (flip (:)) [] (reverse l)
+
+Por prop (diapo teorica, conversión de foldr a foldl): [1]
+= foldr (:) [] l
+
+Por Teorema [2]:
+= l
+
+Por definición {ID}:
+= id l
+                                                                        ■
+
+
+Demostración teorema [2]:
+
+Queremos demostrar: ∀l :: [a] . foldr (:) [] l = l
+
+---------------------------------------------------------------
+Por inducción estructural sobre lista, basta probar que:
+
+1. Caso base, P([]) se cumple
+2. Paso inductivo,  ∀x :: a . ∀xs :: [a] . P((xs)) => P((x:xs))
+
+Sea l :: [a], Definimos P(l) := foldr (:) [] l = l
+---------------------------------------------------------------
+
+| Caso base:
+
+Queremos ver que: foldr (:) [] [] = []
+
+Por def de {FOLDR0}:
+foldr (:) [] [] = []
+
+∴ Se cumple el caso base.
+
+| Paso inductivo:
+
+{HI}: foldr (:) [] xs = xs
+
+Asumiendo la hipotesis inductiva, queremos ver que se cumple: foldr (:) [] (x:xs) = (x:xs)
+
+Por definición de {FOLDR1}:
+foldr (:) [] (x:xs) = (:) x (foldr (:) [] xs)
+
+Por {HI}:
+= (:) x xs
+
+Por {(:)}:
+= (x:xs)
+
+∴ Se cumple el paso inductivo.
+
+Queda demostrado el teorema.
+                                                                        ■

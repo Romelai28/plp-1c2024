@@ -1,0 +1,292 @@
+-- EJ 3:
+
+Considerar las siguientes funciones:
+
+length :: [a] -> Int
+{L0} length [] = 0
+{L1} length (x:xs) = 1 + length xs
+
+duplicar :: [a] -> [a]
+{D0} duplicar [] = []
+{D1} duplicar (x:xs) = x : x : duplicar xs
+
+append :: [a] -> [a] -> [a]
+{A0} append [] ys = ys
+{A1} append (x:xs) ys = x : append xs ys
+
+(++) :: [a] -> [a] -> [a]
+{++} xs ++ ys = foldr (:) ys xs
+
+ponerAlFinal :: a -> [a] -> [a]
+{P0} ponerAlFinal x = foldr (:) (x:[])
+
+reverse :: [a] -> [a]
+{R0} reverse = foldl (flip (:)) []
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+{FOLDL0} foldl f ac [] = ac
+{FOLDL1} foldl f ac (x : xs) = foldl f (f ac x) xs
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+{FOLDR0} foldr f z [] = z
+{FOLDR1} foldr f z (x : xs) = f x (foldr f z xs)
+
+
+Demostrar las siguientes propiedades:
+
+
+    -- ITEM I --
+
+Lo que quiero probar: ∀ xs::[a] . length (duplicar xs) = 2 * length xs
+
+---------------------------------------------------------------
+Por inducción estructural sobre la lista xs, basta con probar:
+
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P((x:xs))).
+
+Sea l :: [a] . Definimos P(l) := length (duplicar l) = 2 * length l
+---------------------------------------------------------------
+
+| Caso base:
+Queremos ver que: length (duplicar []) = 2 * length []
+
+LHS:
+Por definición de {D0}:
+length (duplicar []) = length []
+
+Por definición de {L0}:
+length [] = 0
+
+RHS:
+Por definición de {L0}:
+2 * length [] = 2 * 0 = 0
+
+∴ Vale el caso base.
+
+| Paso inductivo:
+Queremos ver que ∀x :: a. ∀xs :: [a]. length (duplicar xs) = 2 * length xs  ⇒  length (duplicar (x:xs)) = 2 * length (x:xs).
+
+{HI}: length (duplicar xs) = 2 * length xs
+
+Queremos concluir que si se cumple la hipotesis inductiva, se cumple que: length (duplicar (x:xs)) = 2 * length (x:xs).
+
+LHS:
+Por definición {D1}:
+length (duplicar (x:xs)) = length (x : x : duplicar xs)
+
+Por definición {L1}:
+= 1 + length (x : duplicar xs)
+
+Por definición {L1}:
+= 1 + (1 + length (duplicar xs))
+
+Por {HI}:
+= 1 + (1 + (2 * length xs))
+
+Por propiedad en int de la suma:
+= 2 + (2 * length xs)
+
+
+RHS:
+Por definición {L1}:
+2 * length (x:xs) = 2 * (1 + length xs)
+
+Aplicando distributiva:
+= 2 + (2 * length xs)
+
+∴ Vale el paso inductivo.
+
+Probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+    -- ITEM II --
+
+Lo que quiero probar: ∀ xs::[a] . ∀ ys::[a] . length (append xs ys) = length xs + length ys
+
+---------------------------------------------------------------
+Vamos a hacer inducción sobre xs. Necesito ver que:
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P(x : xs)).
+
+Sea l :: [a] . Definimos P(l) := length (append l ys) = length l + length ys
+---------------------------------------------------------------
+
+| Caso base:
+Queremos ver que: length (append [] ys) = length [] + length ys
+
+LHS:
+Por definición de {A0}:
+length (append [] ys) = length ys
+
+RHS:
+Por definición de {L0}:
+length [] + length ys = 0 + length ys = length ys
+
+∴ Vale el caso base.
+
+| Paso inductivo sobre xs:
+Queremos ver que ∀x :: a. ∀xs :: [a]. length (append xs ys) = length xs + length ys  ⇒  length (append (x:xs) ys) = length (x:xs) + length ys
+
+{HI}: length (append xs ys) = length xs + length ys
+
+Queremos concluir que si se cumple la hipotesis inductiva, se cumple que: length (append (x:xs) ys) = length (x:xs) + length ys.
+
+LHS:
+Por definición de {A1}:
+length (append (x:xs) ys) = length (x : append xs ys)
+
+Por definición de {L1}:
+= 1 + length (append xs ys)
+
+Por {HI}:
+= 1 + length xs + length ys
+
+RHS:
+Por definición de {L1}:
+length (x:xs) + length ys = 1 + length xs + length ys
+
+∴ Vale el paso inductivo.
+
+Probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+    -- ITEM III --  CONSULTAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Lo que quiero probar: ∀ xs::[a] . ∀ f::(a->b) . length (map f xs) = length xs
+
+Ecuaciones extra que vamos a necesitar:
+{M0} map f [] = []
+{M1} map f (x : xs) = f x : map f xs
+
+---------------------------------------------------------------
+Vamos a hacer inducción estructural sobre la lista xs. Necesitamos ver que se cumple:
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀x :: a. ∀xs :: [a]. (P(xs) ⇒ P(x : xs)).
+
+Sea l :: [a] . Definimos P(l) := ∀ f::(a->b) . length (map f l) = length l
+---------------------------------------------------------------
+
+| Caso base:
+Queremos ver que se cumple: ∀ f::(a->b) . length (map f []) = length []
+
+Por definición {M0}:
+length (map f []) = length []
+
+Por definición {L0}:
+length [] = 0
+
+∴ Se cumple el caso base.
+
+| Paso inductivo:
+Queremos ver que si se cumple ∀ x::a . ∀ xs:[a] . ∀ f::(a->b) . length (map f xs) = length xs ⇒ length (map f (x:xs)) = length (x:xs)  -- CONSULTAR CUANTIFICADORES!!! ¿Va a ambos lados? ¿pueden ser distintas a ambos lados?
+
+{HI}: length (map f xs) = length xs
+
+Queremos concluir que se cumple si se cumple la hipotesis inductiva, se cumple que: length (map f (x:xs)) = length (x:xs)
+
+LHS:
+Por definición {M1}:
+length (map f (x:xs)) = length (f x : map f xs)
+
+Por definición {L1}:
+1 + length (map f xs)
+
+Por {HI}:
+1 + length xs
+
+RHS:
+Por definición {L1}:
+length (x:xs) = 1 + length xs
+
+∴ Se cumple el paso inductivo.
+
+Probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+    -- ITEM IV --
+
+Lo que quiero probar: Eq a => ∀ xs::[a] . ∀ p::a->Bool . ∀ e::a . elem e (filter p xs) ⇒ elem e xs
+
+-- consultar si usamos definiciónes con folds para el filter, no estaba definida en el enunciado
+
+
+    -- ITEM V --
+
+Lo que quiero probar: ∀ xs::[a] . ∀ x::a . length (ponerAlFinal x xs) = 1 + length xs
+
+Vamos a demostrarlo utilizando inducción estructural sobre la lista xs.
+
+---------------------------------------------------------------
+Para ello vamos a necesitar probar:
+I. Vale para la lista vacía (Caso base)  P([]).
+II. Vale el paso inductivo.  ∀y :: a. ∀ys :: [a]. (P(ys) ⇒ P(y : ys)).
+
+Sea l::[a] . Definimos P(l) := ∀ x::a . length (ponerAlFinal x l) = 1 + length l
+---------------------------------------------------------------
+
+| Caso base:
+
+Queremos ver que se cumple: length (ponerAlFinal x []) = 1 + length []
+
+Por definición {P0}:
+length (ponerAlFinal x []) = length (foldr (:) (x:[]) [])
+
+Por definición {FOLDR0}:
+= length (x:[])
+
+Por definición {L1}:
+= 1 + length []
+
+∴ Se cumple el caso base.
+
+| Paso inductivo:
+
+{HI}: ∀ x::a . length (ponerAlFinal x ys) = 1 + length ys
+
+    LHS de HI:
+    Por definición {P0}:
+    length (ponerAlFinal x ys) = length (foldr (:) (x:[]) ys)
+
+    Por lo tanto, {HI'}: ∀ x::a . length (foldr (:) (x:[]) ys) = 1 + length ys
+
+Queremos ver que si se cumple la hipotesis inductiva, entonces se cumple que ∀ x::a . length (ponerAlFinal x (y:ys)) = 1 + length (y:ys)
+
+Sea un x::a arbitrario:
+
+LHS:
+Por definición de {P0}:
+length (ponerAlFinal x (y:ys)) = length (foldr (:) (x:[]) (y:ys))
+
+Por definición de {FOLDR1}:
+= length ((:) y (foldr (:) (x:[]) ys))
+
+Reescribo usando notación infija (:) (paso innecesario pero ayuda a ver):
+= length (y : (foldr (:) (x:[]) ys))
+
+Por definición de {L1}:
+= 1 + length (foldr (:) (x:[]) ys)
+
+Por {HI'}:
+= 1 + (1 + length ys)
+
+RHS:
+Por definición de {L1}:
+1 + length (y:ys) = 1 + (1 + length ys)
+
+El LHS y el RHS coinciden, bien.
+Cómo no hice ninguna suposición sobre x::a y lo deje siendo arbitrario, la igualdad que demostramos en el paso inductivo vale para cualquier x::a, por lo tanto se cumplen para todos los x::a:
+Demostramos que si se cumple la hipotesis inductiva, entonces se cumple que ∀ x::a . length (ponerAlFinal x (y:ys)) = 1 + length (y:ys)
+
+∴ Se cumple el paso inductivo.
+
+Como probamos el caso base y el paso inductivo, queda demostrado el teorema que queríamos demostrar.
+                                                                        ■
+
+
+    -- ITEM VI --
+
+Lo que quiero probar: ∀ f::a->b . ∀ e::a . ∀ xs::[xs] . (elem e xs = True) ⇒ (elem (f e) (map f xs) = True)
+(asumiendo Eq a y Eq b)
+
+-- SEGUIR
