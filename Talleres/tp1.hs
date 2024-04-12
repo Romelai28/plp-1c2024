@@ -150,7 +150,7 @@ objetos_en_posesión_de nom_per u =  filter (\x -> en_posesión_de nom_per x) (o
 {-Ejercicio 6-}
 
 tiene_thanos_todas_las_gemas :: Universo -> Bool
-tiene_thanos_todas_las_gemas u = cant_elem_que_cumplen es_una_gema (objetos_en_posesión_de "Thanos" u) >= 6
+tiene_thanos_todas_las_gemas u = cant_elem_que_cumplen es_una_gema (objetos_en_posesión_de "Thanos" u) == 6 -- ¿ó >=6?
 
 -- Dada una condición y una lista, devuelve la cantidad de elementos de la lista que cumplen esa condición.
 cant_elem_que_cumplen :: (a->Bool) -> [a] -> Int 
