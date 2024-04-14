@@ -126,26 +126,31 @@ posición_personaje :: Personaje -> Posición
 posición_personaje = foldPersonaje const siguiente_posición id
 
 nombre_objeto :: Objeto -> String
-nombre_objeto = foldObjeto (flip(const)) const id
+nombre_objeto = foldObjeto (flip const) const id
+-- nombre_objeto = foldObjeto (flip(const)) const id ---- BORRAR VIEJO
 
 {-Ejercicio 3-}
 
 objetos_en :: Universo -> [Objeto]
 objetos_en u = [ x | Right x <- u ]
+-- objetos_en = foldr (\x rec -> if es_un_objeto x then objeto_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
 
 personajes_en :: Universo -> [Personaje]
 personajes_en u = [ x | Left x <- u ]
+-- personajes_en = foldr (\x rec -> if es_un_personaje x then personaje_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
 
 {-Ejercicio 4-}
 
 objetos_en_posesión_de :: String -> Universo -> [Objeto]  -- Recibe el nombre de un personaje y un universo, devuelve la lista de objetos que le pertenecen
-objetos_en_posesión_de nom_per u =  filter (\x -> en_posesión_de nom_per x) (objetos_en u)
+objetos_en_posesión_de nom_per u = filter (en_posesión_de nom_per) (objetos_en u)
+-- objetos_en_posesión_de nom_per u =  filter (\x -> en_posesión_de nom_per x) (objetos_en u)  ---- BORRAR VIEJO
 
 {-Ejercicio 5-}
 
 -- Asume que hay al menos un objeto
---objeto_libre_mas_cercano :: ?
---objeto_libre_mas_cercano = ?
+objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
+objeto_libre_mas_cercano p u = foldr1 (\x rec -> if distancia (Right x) (Left p) > distancia (Right rec) (Left p) then x else rec) (objetos_en u)
+    where pos = posición_personaje p
 
 {-Ejercicio 6-}
 
