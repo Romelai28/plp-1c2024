@@ -1,3 +1,5 @@
+Definición de las funciones relevantes:
+
 map :: (a -> b) -> [a] -> [b]
 map f [] = []                                           {M0}
 map f (x : xs) = f x : map f xs                         {M1}
@@ -27,21 +29,57 @@ es_un_objeto (Right o) = True                           {ES_UN_OBJETO_T}
 Teorema de demostrar:
 ∀ u :: Universo . ∀ o :: Objeto . elem o (objetos_en u) ⇒ elem (Right o) u
 
-Demostración:
-
 Nota: Universo = [Either Personaje Objeto]
 
+Demostración:
+
 ---------------------------------------------------------------
-Por inducción estructural sobre lista, basta probar que:
+Por inducción estructural sobre la lista u, basta probar que:
 
 1. Caso base, P([]) se cumple
 2. Paso inductivo,  ∀x :: Either Personaje Objeto . ∀xs :: u . P((xs)) => P((x:xs))
 
-Sea u :: Universo = u, Definimos P(u) := elem o (objetos_en u) ⇒ elem (Right o) u
+Sea u :: Universo, Definimos P(u) := elem o (objetos_en u) ⇒ elem (Right o) u
 ---------------------------------------------------------------
 
 | Caso base:
-(...)
+
+Queremos ver que: elem o (objetos_en []) ⇒ elem (Right o) []
+
+Por cómodidad para trabajar, consideremeos
+(1): elem o (objetos_en [])
+(2): elem (Right o) []
+y luego veamos que (1) => (2)
+
+| Empecemos por (1):
+elem o (objetos_en [])
+
+Por definición de {OBJETOS_EN}:
+= elem o ((map objeto_de . filter es_un_objeto) [])
+
+Por definición de {(.)}:
+= elem o ((map objetos_de (filter es_un_objeto [])))
+
+Por definición de {F0}:
+= elem o (map objetos_de [])
+
+Por definición de {M0}:
+= elem o []
+
+Por definición de {E0}:
+= False
+
+| Veamos (2):
+elem (Right o) []
+
+Por definición de {E0}:
+= False
+
+Luego, juntando las dos expresiones, (1) => (2) se puede escribir cómo:
+False    =>    False
+y esta implicación es verdadera.
+
+∴ Se cumple el caso base.
 
 | Paso inductivo:
 
@@ -54,24 +92,39 @@ Por cómodidad para trabajar, consideremeos
 (2): elem (Right o) (x:xs)
 y luego veamos que (1) => (2)
 
-Empecemos por (1):
+---------------------------------------------------------------
+Por extensionalidad para sumas, si x :: Either Persona Objeto entonces:
+| ó bien ∃y :: Objeto . x = Right y
+| ó bien ∃z :: Persona . x = Left z
+
+Por lo tanto basta probar ambos casos por separado,
+Caso A: si ∃y :: Objeto tal que x = Right y entonces vale que:  elem o (objetos_en ((Right y):xs)) => elem (Right o) ((Right y):xs)
+and
+Caso B: si ∃z :: Persona tal que x = Left z entonces vale que:  elem o (objetos_en ((Left z):xs)) => elem (Right o) ((Left z):xs)
+---------------------------------------------------------------
+
+| CASO A:  (∃y :: Objeto tal que x = Right y)
+
+    | Empecemos por (1):
 elem o (objetos_en (x:xs))
 
+Como x = Right y, nos queda:
+= elem o (objetos_en ((Right y):xs))
+
 Por definición de {(.)}:
-= elem o (map objetos_de (filter es_un_objeto (x:xs)))
+= elem o (map objetos_de (filter es_un_objeto ((Right y):xs)))
 
 Por definición de {F1}:
-= elem o (map objetos_de (if es_un_objeto x
-                                then (x : filter es_un_objeto xs)
+= elem o (map objetos_de (if es_un_objeto (Right y)
+                                then ((Right y) : filter es_un_objeto xs)
                                 else (filter es_un_objeto xs)))
 
-Justificar por extensionalidad en bools:
+Por definición de {ES_UN_OBJETO_T}:
+= elem o (map objetos_de (if True
+                                then ((Right y) : filter es_un_objeto xs)
+                                else (filter es_un_objeto xs)))
 
-(*) Supongamos que es cierto que es_un_objeto x:
-Por {ES_UN_OBJETO_T} x debe de ser de la forma Right y
-
-Entonces:
-
+Luego, como la condición del if se cumple, nos queda:
 = elem o (map objetos_de ((Right y) : filter es_un_objeto xs))
 
 Por definición de {M1}:
@@ -89,14 +142,109 @@ Por definición de {(.)}:
 Por definición de {OBJETOS_EN}:
 = o == y || elem o (objetos_en xs)
 
-Veamos (2):
+    | Veamos (2):
 elem (Right o) (x:xs)
 
+Como x = Right y, nos queda:
+elem (Right o) ((Right y):xs)
+
 Por definición de {E1}:
-= (right o) == x || elem (Right o) xs
+= (Right o) == (Right y) || elem (Right o) xs
 
-Como habíamos dicho que x era de la forma Right y, tenemos que:
-= (right o) == (Right y) || elem (Right o) xs
+--
 
-Teorema:
-a == b => Right a == Right b
+Luego, juntando las dos expresiones, (1) => (2) se puede escribir cómo:
+o == y || elem o (objetos_en xs)    =>    (Right o) == (Right y) || elem (Right o) xs
+
+Veamos que se cumple la implicación, es decir, que si asumimos el antecendente, se cumple el consecuente.       -- CONSULTAR: ASÍ ESTA BIEN JUSTIFICADO PARA ESTA MATERIA (TRIVIAL) Ó QUIEREN QUE USEMOS EXTENSIONALIDAD DE PARES DOS VECES PARA JUSTIFICAR ESTE RAZONAMIENTO POR PARTES CÓMO ACA https://campus.exactas.uba.ar/pluginfile.php/553353/mod_resource/content/1/Demstrando%20implicaciones.pdf ?? ES UN OVERKILL EN MI OPINIÓN
+
+| Supongamos que o == y es verdadero:                       -- Notar que (elem o (objetos_en xs)) esta libre, puede cumplirse o no.
+Luego por definición de función matemática, vale que (Right o) == (Right y)
+Luego:
+True || elem o (objetos_en xs) => True || elem (Right o) xs
+True => True
+True
+
+| Supongamos que elem o (objetos_en xs) es verdadero:       -- Notar que (o == y) esta libre, puede cumplirse o no.
+Luego por HI también es verdadero elem (Right o) xs,
+Luego:
+o == y || True => (Right o) == (Right y) || True
+True => True
+True
+
+Por lo tanto, demostramos el CASO A, si ∃y :: Objeto tal que x = Right y entonces la implicación (1) => (2) se cumple.
+
+
+| CASO B:  (∃z :: Objeto tal que x = Left z)
+
+    | Empecemos por (1):
+elem o (objetos_en (x:xs))
+
+Como x = Left z, nos queda:
+= elem o (objetos_en ((Left z):xs))
+
+Por definición de {(.)}:
+= elem o (map objetos_de (filter es_un_objeto ((Left z):xs)))
+
+Por definición de {F1}:
+= elem o (map objetos_de (if es_un_objeto (Left z)
+                                then ((Left z) : filter es_un_objeto xs)
+                                else (filter es_un_objeto xs)))
+
+Por definición de {ES_UN_OBJETO_F}:
+= elem o (map objetos_de (if False
+                                then ((Left z) : filter es_un_objeto xs)
+                                else (filter es_un_objeto xs)))
+
+Luego, como la condición del if NO se cumple, nos queda:
+= elem o (map objetos_de (filter es_un_objeto xs))
+
+Por definición de {(.)}:
+= elem o ((map objeto_de . filter es_un_objeto) xs)
+
+Por definición de {OBJETOS_EN}:
+= elem o (objetos_en xs)
+
+    | Veamos (2):
+elem (Right o) (x:xs)
+
+Como x = Left z, nos queda:
+= elem (Right o) ((Left z):xs)
+
+Por definición de {E1}:
+= Right o == Left z || elem (Right o) xs
+
+----- ??????????????
+Recordemos que
+o :: Objeto,
+Right o :: Either Persona Objeto
+
+x :: Persona,
+Left z :: Either Persona Objeto
+----- ??????????????
+
+Luego por (???):
+= False || elem (Right o) xs
+
+Por propiedad del {||}:
+= elem (Right o) xs
+
+--
+
+Luego, juntando las dos expresiones, (1) => (2) se puede escribir cómo:
+elem o (objetos_en xs)    =>    elem (Right o) xs
+
+Y eso que nos quedo era justamente nuestra hipotesis inductiva, pues recordemos que {HI}: elem o (objetos_en xs) ⇒ elem (Right o) xs
+Vale por hipotesis inductiva.
+
+Por lo tanto, demostramos el CASO B, si ∃z :: Persona tal que x = Left z entonces la implicación (1) => (2) se cumple.
+
+--
+
+Ya demostramos los dos casos que nos presento la extensionalidad en sumas. Vimos que la implicación (1) => (2) se cumple tanto en el caso A, como en el caso B.
+∴ Queda probado que se cumple el paso inductivo.
+
+--
+
+Como demostramos el caso base y el paso inductivo,
+queda demostrado que:  ∀ u :: Universo . ∀ o :: Objeto . elem o (objetos_en u) ⇒ elem (Right o) u
