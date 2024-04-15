@@ -137,7 +137,8 @@ objetos_en = map objeto_de . filter es_un_objeto
 -- objetos_en = foldr (\x rec -> if es_un_objeto x then objeto_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
 
 personajes_en :: Universo -> [Personaje]
-personajes_en u = [ x | Left x <- u ]
+-- personajes_en u = [ x | Left x <- u ]
+personajes_en = map personaje_de . filter es_un_personaje
 -- personajes_en = foldr (\x rec -> if es_un_personaje x then personaje_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
 
 {-Ejercicio 4-}
@@ -150,8 +151,7 @@ objetos_en_posesión_de nom_per u = filter (en_posesión_de nom_per) (objetos_en
 
 -- Asume que hay al menos un objeto
 objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
-objeto_libre_mas_cercano p u = foldr1 (\x rec -> if distancia (Right x) (Left p) > distancia (Right rec) (Left p) then x else rec) (objetos_en u)
-    where pos = posición_personaje p
+objeto_libre_mas_cercano p u = foldr1 (\x rec -> if objeto_libre x && distancia (Right x) (Left p) < distancia (Right rec) (Left p) then x else rec) (objetos_en u)
 
 {-Ejercicio 6-}
 
@@ -170,12 +170,13 @@ podemos_ganarle_a_thanos u = not (tiene_thanos_todas_las_gemas u) && (thor_win |
     thor_win = está_el_personaje "Thor" u && está_el_objeto "Stormbreaker" u
     wanda_vision_win = está_el_personaje "Wanda" u && está_el_personaje "Visión" u && en_posesión_de "Visión" (objeto_de_nombre "Gema de la mente" u)
 
-{-Tests-}
-{- 
+
+{- Tests -}
+
 main :: IO Counts
 main = do runTestTT allTests
 
-allTests = test [ -- Reemplazar los tests de prueba por tests propios
+allTests = test [ 
   "ejercicio1" ~: testsEj1,
   "ejercicio2" ~: testsEj2,
   "ejercicio3" ~: testsEj3,
@@ -187,6 +188,37 @@ allTests = test [ -- Reemplazar los tests de prueba por tests propios
 
 phil = Personaje (0,0) "Phil"
 mjölnir = Objeto (2,2) "Mjölnir"
+thor = Personaje (4,6) "Thor"
+thanos = Personaje (6,8) "Thanos"
+wanda = Personaje (23,7) "Wanda"
+vision = Personaje (23,8) "Visión"
+gemaPoder = Objeto (23, 8) "Gema del poder"
+gemaMente = Objeto (27, 8) "Gema de la mente"
+gemaRealidad = Objeto (22, 45) "Gema de la realidad"
+gemaTiempo = Objeto (25, 78) "Gema del tiempo"
+gemaEspacio = Objeto (50, 86) "Gema del espacio"
+gemaAlma = Objeto (2, 81) "Gema del alma"
+gemaPoder2 = Tomado (Objeto (3, 18) "Gema del poder") thanos
+gemaMente2 = Tomado (Objeto (33, 85) "Gema de la mente") thanos
+gemaRealidad2 = Tomado (Objeto (14, 48) "Gema de la realidad") thanos
+gemaTiempo2 = Tomado (Objeto (34, 78) "Gema del tiempo") thanos
+gemaEspacio2 = Tomado (Objeto (75, 24) "Gema del espacio") thanos
+gemaAlma2 = Tomado (Objeto (3, 81) "Gema del alma") thanos
+stormbreaker = Objeto (56, 45) "Stormbreaker"
+stormbreaker2 = Tomado (Objeto (56, 45) "Stormbreaker") thor
+gemaMente3 = Tomado (Objeto (33, 85) "Gema de la mente") vision
+personajeQueSeMueve = Mueve (Mueve (Mueve (Personaje (2,3) "Me Muevo") Norte) Sur) Norte
+
+universo_con_thanos_sin_gemas = [Left thanos, Left wanda, Right gemaPoder2, Right gemaMente2, Right gemaRealidad2, Right gemaTiempo2, Right gemaEspacio2, Right gemaAlma, Left thor, Right mjölnir]
+
+universo_thanos_todas_las_gemas = [Left thanos, Left wanda, Right gemaPoder2, Right gemaMente2, Right gemaRealidad2, Right gemaTiempo2, Right gemaEspacio2, Right gemaAlma2, Left thor, Right mjölnir]
+
+universo_ganamos_a_thanos_con_vision = [Left thanos, Left wanda, Left vision, Right gemaPoder2, Right gemaMente3, Right gemaRealidad2, Right gemaTiempo2, Right gemaEspacio2, Right gemaAlma2, Left thor, Right mjölnir]
+
+universo_ganamos_a_thanos_con_thor = [Left thanos, Left wanda, Right gemaPoder, Right gemaMente2, Right gemaRealidad2, Right gemaTiempo2, Right gemaEspacio2, Right gemaAlma2, Left thor, Right mjölnir, Right stormbreaker]
+
+universo_ganamos_a_thanos_con_thor_2 = [Left thanos, Left wanda, Right gemaPoder, Right gemaMente2, Right gemaRealidad2, Right gemaTiempo2, Right gemaEspacio2, Right gemaAlma2, Left thor, Right mjölnir, Right stormbreaker2]
+
 universo_sin_thanos = universo_con [phil] [mjölnir]
 
 testsEj1 = test [ -- Casos de test para el ejercicio 1
@@ -195,34 +227,124 @@ testsEj1 = test [ -- Casos de test para el ejercicio 1
   ,
   foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) (Muere phil)     -- Caso de test 2 - expresión a testear
     ~=? 1                                                               -- Caso de test 2 - resultado esperado
+  ,
+  foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) (Muere(Mueve phil Norte))    -- Caso de test 3 - expresion a testear
+    ~=? 2                                                                    -- Caso de test 3 - resultado esperado
   ]
 
 testsEj2 = test [ -- Casos de test para el ejercicio 2
   posición_personaje phil       -- Caso de test 1 - expresión a testear
     ~=? (0,0)                   -- Caso de test 1 - resultado esperado
+  ,
+  posición_personaje thanos       -- Caso de test 1 - expresión a testear
+    ~=? (6,8)                   -- Caso de test 1 - resultado esperado
+  ,
+  posición_personaje vision      -- Caso de test 1 - expresión a testear
+    ~=? (23,8)                   -- Caso de test 1 - resultado esperado
+  ,
+  posición_personaje thor       -- Caso de test 1 - expresión a testear
+    ~=? (4,6)                   -- Caso de test 1 - resultado esperado
+  ,
+  posición_personaje personajeQueSeMueve       -- Caso de test 1 - expresión a testear
+    ~=? (2,4)                                   -- Caso de test 1 - resultado esperado
+  ,
+  nombre_objeto stormbreaker            -- Caso de test 1 - expresión a testear
+    ~=? "Stormbreaker"                  -- Caso de test 1 - resultado esperado
+  ,
+  nombre_objeto gemaMente3           -- Caso de test 1 - expresión a testear
+    ~=? "Gema de la mente"                  -- Caso de test 1 - resultado esperado
+  ,
+  nombre_objeto gemaMente2           -- Caso de test 1 - expresión a testear
+    ~=? "Gema de la mente"                  -- Caso de test 1 - resultado esperado
   ]
 
 testsEj3 = test [ -- Casos de test para el ejercicio 3
   objetos_en []       -- Caso de test 1 - expresión a testear
     ~=? []            -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en universo_con_thanos_sin_gemas       -- Caso de test 1 - expresión a testear
+    ~=? [gemaPoder2, gemaMente2, gemaRealidad2, gemaTiempo2, gemaEspacio2, gemaAlma, mjölnir]            -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en universo_sin_thanos                                  -- Caso de test 1 - expresión a testear
+    ~=? [mjölnir]                                                 -- Caso de test 1 - resultado esperado
+  ,
+  personajes_en []       -- Caso de test 1 - expresión a testear
+    ~=? []            -- Caso de test 1 - resultado esperado
+  ,
+  personajes_en universo_con_thanos_sin_gemas       -- Caso de test 1 - expresión a testear
+    ~=? [thanos, wanda, thor]            -- Caso de test 1 - resultado esperado
+  ,
+  personajes_en universo_sin_thanos                                  -- Caso de test 1 - expresión a testear
+    ~=? [phil]                                                 -- Caso de test 1 - resultado esperado
   ]
 
 testsEj4 = test [ -- Casos de test para el ejercicio 4
   objetos_en_posesión_de "Phil" []       -- Caso de test 1 - expresión a testear
     ~=? []                             -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en_posesión_de "Thanos" universo_con_thanos_sin_gemas       -- Caso de test 1 - expresión a testear
+    ~=? [gemaPoder2, gemaMente2, gemaRealidad2, gemaTiempo2, gemaEspacio2]       -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en_posesión_de "Visión" universo_ganamos_a_thanos_con_vision       -- Caso de test 1 - expresión a testear
+    ~=? [gemaMente3]       -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en_posesión_de "Thor" universo_ganamos_a_thanos_con_thor       -- Caso de test 1 - expresión a testear
+    ~=? []       -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en_posesión_de "Thor" universo_ganamos_a_thanos_con_thor_2       -- Caso de test 1 - expresión a testear
+    ~=? [stormbreaker2]       -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en_posesión_de "Thanos" universo_thanos_todas_las_gemas       -- Caso de test 1 - expresión a testear
+    ~=? [gemaPoder2, gemaMente2, gemaRealidad2, gemaTiempo2, gemaEspacio2, gemaAlma2]       -- Caso de test 1 - resultado esperado
   ]
 
 testsEj5 = test [ -- Casos de test para el ejercicio 5
   objeto_libre_mas_cercano phil [Right mjölnir]       -- Caso de test 1 - expresión a testear
     ~=? mjölnir                                       -- Caso de test 1 - resultado esperado
+  ,
+  objeto_libre_mas_cercano vision universo_ganamos_a_thanos_con_vision        -- Caso de test 1 - expresión a testear
+    ~=? gemaMente3                                       -- Caso de test 1 - resultado esperado
+  ,
+  objeto_libre_mas_cercano wanda [Right gemaPoder, Right gemaMente]       -- Caso de test 1 - expresión a testear
+    ~=? gemaPoder                                     -- Caso de test 1 - resultado esperado
+  ,
+  objeto_libre_mas_cercano thor universo_ganamos_a_thanos_con_thor       -- Caso de test 1 - expresión a testear
+    ~=? gemaAlma2                                      -- Caso de test 1 - resultado esperado
+  ,
+  objeto_libre_mas_cercano thanos universo_con_thanos_sin_gemas       -- Caso de test 1 - expresión a testear
+    ~=? gemaEspacio2                                      -- Caso de test 1 - resultado esperado
   ]
 
 testsEj6 = test [ -- Casos de test para el ejercicio 6
   tiene_thanos_todas_las_gemas universo_sin_thanos       -- Caso de test 1 - expresión a testear
     ~=? False                                            -- Caso de test 1 - resultado esperado
+  ,
+  tiene_thanos_todas_las_gemas universo_ganamos_a_thanos_con_vision       -- Caso de test 1 - expresión a testear
+    ~=? False   
+  ,
+  tiene_thanos_todas_las_gemas universo_ganamos_a_thanos_con_thor       -- Caso de test 1 - expresión a testear
+    ~=? False                                            -- Caso de test 1 - resultado esperado
+  ,
+  tiene_thanos_todas_las_gemas universo_thanos_todas_las_gemas       -- Caso de test 1 - expresión a testear
+    ~=? True                                            -- Caso de test 1 - resultado esperado
   ]
 
 testsEj7 = test [ -- Casos de test para el ejercicio 7
   podemos_ganarle_a_thanos universo_sin_thanos         -- Caso de test 1 - expresión a testear
     ~=? False                                          -- Caso de test 1 - resultado esperado
-  ] -}
+  ,
+  podemos_ganarle_a_thanos universo_ganamos_a_thanos_con_thor         -- Caso de test 1 - expresión a testear
+    ~=? True                                          -- Caso de test 1 - resultado esperado
+  ,
+  podemos_ganarle_a_thanos universo_ganamos_a_thanos_con_vision         -- Caso de test 1 - expresión a testear
+    ~=? True                                          -- Caso de test 1 - resultado esperado
+  ,
+  podemos_ganarle_a_thanos universo_ganamos_a_thanos_con_thor_2         -- Caso de test 1 - expresión a testear
+    ~=? True                                          -- Caso de test 1 - resultado esperado
+  ,
+  podemos_ganarle_a_thanos universo_thanos_todas_las_gemas         -- Caso de test 1 - expresión a testear
+    ~=? False                                          -- Caso de test 1 - resultado esperado
+  ,
+  podemos_ganarle_a_thanos  universo_con_thanos_sin_gemas         -- Caso de test 1 - expresión a testear
+    ~=? False                                          -- Caso de test 1 - resultado esperado
+  ]
