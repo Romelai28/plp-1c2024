@@ -132,7 +132,8 @@ nombre_objeto = foldObjeto (flip const) const id
 {-Ejercicio 3-}
 
 objetos_en :: Universo -> [Objeto]
-objetos_en u = [ x | Right x <- u ]
+--objetos_en u = [ x | Right x <- u ]
+objetos_en = map objeto_de . filter es_un_objeto
 -- objetos_en = foldr (\x rec -> if es_un_objeto x then objeto_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
 
 personajes_en :: Universo -> [Personaje]

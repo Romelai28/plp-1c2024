@@ -1,0 +1,102 @@
+map :: (a -> b) -> [a] -> [b]
+map f [] = []                                           {M0}
+map f (x : xs) = f x : map f xs                         {M1}
+
+filter :: (a -> Bool) -> [a] -> [a]
+filter p [] = []                                        {F0}
+filter p (x : xs) = if p x                              {F1}
+                        then x : filter p xs
+                        else filter p xs
+
+elem  :: Eq a => a -> [a] -> Bool
+elem e [] = False                                       {E0}
+elem e (x:xs) = (e==x) || elem e xs                     {E1}
+
+objetos_en :: Universo -> [Objeto]
+objetos_en = map objeto_de . filter es_un_objeto        {OBJETOS_EN}
+
+objeto_de :: Either Personaje Objeto -> Objeto
+objeto_de (Right o) = o                                 {OBJETO_DE}
+
+es_un_objeto :: Either Personaje Objeto -> Bool
+es_un_objeto (Left p) = False                           {ES_UN_OBJETO_F}
+es_un_objeto (Right o) = True                           {ES_UN_OBJETO_T}
+
+--
+
+Teorema de demostrar:
+∀ u :: Universo . ∀ o :: Objeto . elem o (objetos_en u) ⇒ elem (Right o) u
+
+Demostración:
+
+Nota: Universo = [Either Personaje Objeto]
+
+---------------------------------------------------------------
+Por inducción estructural sobre lista, basta probar que:
+
+1. Caso base, P([]) se cumple
+2. Paso inductivo,  ∀x :: Either Personaje Objeto . ∀xs :: u . P((xs)) => P((x:xs))
+
+Sea u :: Universo = u, Definimos P(u) := elem o (objetos_en u) ⇒ elem (Right o) u
+---------------------------------------------------------------
+
+| Caso base:
+(...)
+
+| Paso inductivo:
+
+{HI}: elem o (objetos_en xs) ⇒ elem (Right o) xs
+
+Asumiendo la hipotesis inductiva, queremos ver que se cumple: elem o (objetos_en (x:xs)) ⇒ elem (Right o) (x:xs)
+
+Por cómodidad para trabajar, consideremeos
+(1): elem o (objetos_en (x:xs))
+(2): elem (Right o) (x:xs)
+y luego veamos que (1) => (2)
+
+Empecemos por (1):
+elem o (objetos_en (x:xs))
+
+Por definición de {(.)}:
+= elem o (map objetos_de (filter es_un_objeto (x:xs)))
+
+Por definición de {F1}:
+= elem o (map objetos_de (if es_un_objeto x
+                                then (x : filter es_un_objeto xs)
+                                else (filter es_un_objeto xs)))
+
+Justificar por extensionalidad en bools:
+
+(*) Supongamos que es cierto que es_un_objeto x:
+Por {ES_UN_OBJETO_T} x debe de ser de la forma Right y
+
+Entonces:
+
+= elem o (map objetos_de ((Right y) : filter es_un_objeto xs))
+
+Por definición de {M1}:
+= elem o ((objeto_de (Right y)) : (map es_un_objeto (filter es_un_objeto xs)))
+
+Por definición de {E1}:
+= o == objeto_de (Right y) || elem o (map es_un_objeto (filter es_un_objeto xs))
+
+Por definición de {OBJETOS_DE}
+= o == y || elem o (map es_un_objeto (filter es_un_objeto xs)) 
+
+Por definición de {(.)}:
+= o == y || elem o ((map es_un_objeto . filter es_un_objeto) xs)
+
+Por definición de {OBJETOS_EN}:
+= o == y || elem o (objetos_en xs)
+
+Veamos (2):
+elem (Right o) (x:xs)
+
+Por definición de {E1}:
+= (right o) == x || elem (Right o) xs
+
+Como habíamos dicho que x era de la forma Right y, tenemos que:
+= (right o) == (Right y) || elem (Right o) xs
+
+Teorema:
+a == b => Right a == Right b
