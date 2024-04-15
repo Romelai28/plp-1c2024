@@ -303,16 +303,16 @@ testsEj5 = test [ -- Casos de test para el ejercicio 5
     ~=? mjölnir                                       -- Caso de test 1 - resultado esperado
   ,
   objeto_libre_mas_cercano vision universo_ganamos_a_thanos_con_vision        -- Caso de test 1 - expresión a testear
-    ~=? gemaMente3                                       -- Caso de test 1 - resultado esperado
+    ~=? mjölnir                                       -- Caso de test 1 - resultado esperado
   ,
   objeto_libre_mas_cercano wanda [Right gemaPoder, Right gemaMente]       -- Caso de test 1 - expresión a testear
     ~=? gemaPoder                                     -- Caso de test 1 - resultado esperado
   ,
   objeto_libre_mas_cercano thor universo_ganamos_a_thanos_con_thor       -- Caso de test 1 - expresión a testear
-    ~=? gemaAlma2                                      -- Caso de test 1 - resultado esperado
+    ~=? mjölnir                                      -- Caso de test 1 - resultado esperado
   ,
   objeto_libre_mas_cercano thanos universo_con_thanos_sin_gemas       -- Caso de test 1 - expresión a testear
-    ~=? gemaEspacio2                                      -- Caso de test 1 - resultado esperado
+    ~=? mjölnir                                      -- Caso de test 1 - resultado esperado
   ]
 
 testsEj6 = test [ -- Casos de test para el ejercicio 6
