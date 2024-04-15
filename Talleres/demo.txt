@@ -214,16 +214,23 @@ Como x = Left z, nos queda:
 Por definición de {E1}:
 = Right o == Left z || elem (Right o) xs
 
------ ??????????????
-Recordemos que
-o :: Objeto,
-Right o :: Either Persona Objeto
+-------
+- Resultado intermedio:
+- Intuitivamente Right o != Left z, notemos que ambas son de tipo Either Persona Objeto.
+- Demostremoslo, para ello basta con encontrar una observación obs :: Either Persona Objeto -> Bool que los distinga.
+-
+- Sea:
+- obs :: Either Persona Objeto -> Bool
+- obs = es_un_objeto
+-
+- Tenemos que:
+- obs (Right o) = es_un_objeto (Right o) = True
+- obs (Left z) = es_un_objeto (Left z) = False
+-
+- Por lo tanto, encontramos un ejemplo de una observación que los distingue, Right o != Left z
+-------
 
-x :: Persona,
-Left z :: Either Persona Objeto
------ ??????????????
-
-Luego por (???):
+Luego por lo anterior tenemos que:
 = False || elem (Right o) xs
 
 Por propiedad del {||}:
@@ -248,3 +255,5 @@ Ya demostramos los dos casos que nos presento la extensionalidad en sumas. Vimos
 
 Como demostramos el caso base y el paso inductivo,
 queda demostrado que:  ∀ u :: Universo . ∀ o :: Objeto . elem o (objetos_en u) ⇒ elem (Right o) u
+
+                                                                                                                                                                ■

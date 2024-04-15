@@ -116,6 +116,3 @@ append (x:xs) ys = x : append xs ys
 
 ponerAlFinal :: a -> [a] -> [a]
 ponerAlFinal x = foldr (:) (x:[])
-
-ponerAlFinal :: a -> [a] -> [a]
-ponerAlFinal x = foldr (:) (x:[])
