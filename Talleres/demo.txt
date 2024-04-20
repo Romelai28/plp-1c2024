@@ -156,7 +156,7 @@ Por definición de {E1}:
 Luego, juntando las dos expresiones, (1) => (2) se puede escribir cómo:
 o == y || elem o (objetos_en xs)    =>    (Right o) == (Right y) || elem (Right o) xs
 
-Veamos que se cumple la implicación, es decir, que si asumimos el antecendente, se cumple el consecuente.       -- CONSULTAR: ASÍ ESTA BIEN JUSTIFICADO PARA ESTA MATERIA (TRIVIAL) Ó QUIEREN QUE USEMOS EXTENSIONALIDAD DE PARES DOS VECES PARA JUSTIFICAR ESTE RAZONAMIENTO POR PARTES CÓMO ACA https://campus.exactas.uba.ar/pluginfile.php/553353/mod_resource/content/1/Demstrando%20implicaciones.pdf ?? ES UN OVERKILL EN MI OPINIÓN
+(*) Veamos que se cumple la implicación, es decir, que si asumimos el antecendente, se cumple el consecuente.
 
 | Supongamos que o == y es verdadero:                       -- Notar que (elem o (objetos_en xs)) esta libre, puede cumplirse o no.
 Luego por definición de función matemática, vale que (Right o) == (Right y)
@@ -174,6 +174,21 @@ True
 
 Por lo tanto, demostramos el CASO A, si ∃y :: Objeto tal que x = Right y entonces la implicación (1) => (2) se cumple.
 
+-----
+- (*) Nota: Esta parte de la demostración se podría escribir un poco más formalmente usando explicitamente extensionalidad sobre booleanos primero en (o == y)
+-     y luego cuando o!=y hacer de nuevo extensionalidad sobre booleanos en (elem o (objetos_en xs)).
+-     Decidimos escribirlo de esa manera para mayor claridad.
+-     Si se quisiera justificar explicitando la extensionalidad, se podría hacer de esta manera:
+-
+-     Dado que o==y es un booleano, por el principio de extensionalidad sobre booleanos basta ver que la implicación vale cuando o==y es verdadero y cuando o==y es falso (es decir que o!=y).
+-     Cuando o==y es verdadero vimos que la implicación vale en la demostración anterior.
+-     Cuando o==y es falso, tenemos que: False || elem o (objetos_en xs) => (Right o) == (Right y) || elem (Right o) xs
+-     y esto es equivalente, por propiedad del {OR} a: elem o (objetos_en xs) => (Right o) == (Right y) || elem (Right o) xs
+-     Luego como elem o (objetos_en xs) es un booleano, por principio de extensionalidad sobre booleanos basta ver que la implicación vale cuando elem o (objetos_en xs) es verdadero y cuando elem o (objetos_en xs) es falso.
+-     Para el caso elem o (objetos_en xs) verdadero: La demostración de la implicación es casi calcada a la que hicimos antes (no debería ir el o==y, pues estamos en el caso que eso era False).
+-     Para el caso elem o (objetos_en xs) falso, la implicación vale trivialmente pues False => (...) = Verdadero.
+-     Siguiendo esto, llegariamos a la misma conclusión, el CASO A se cumple.
+-----
 
 | CASO B:  (∃z :: Objeto tal que x = Left z)
 
