@@ -105,70 +105,67 @@ es_una_gema :: Objeto -> Bool
 es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o)
 
 {-Ejercicio 1-}
-
 foldPersonaje :: (Posición -> String -> a) -> (a -> Dirección -> a) -> (a -> a) -> Personaje -> a
-foldPersonaje cPersonaje cMueve cMuere fulano = case fulano of
-    Personaje pos nom -> cPersonaje pos nom
-    Mueve per dir -> cMueve (rec per) dir
-    Muere per -> cMuere (rec per)
+foldPersonaje cPersonaje cMueve cMuere personaje = case personaje of
+    Personaje pos nom -> cPersonaje pos nom         -- Si el personaje está en su posición inicial
+    Mueve per dir -> cMueve (rec per) dir           -- Si el personaje se mueve a una dirección
+    Muere per -> cMuere (rec per)                   -- Si el personaje está muerto
   where rec = foldPersonaje cPersonaje cMueve cMuere
 
 foldObjeto :: (Posición -> String -> a) -> (a -> Personaje -> a) -> (a -> a) -> Objeto -> a
-foldObjeto cObjeto cTomado cEsDestruido cosa = case cosa of
-    Objeto pos nom -> cObjeto pos nom
-    Tomado obj per -> cTomado (rec obj) per
-    EsDestruido obj -> cEsDestruido (rec obj)
+foldObjeto cObjeto cTomado cEsDestruido objeto = case objeto of
+    Objeto pos nom -> cObjeto pos nom               -- Si el objeto está en su posición incial
+    Tomado obj per -> cTomado (rec obj) per         -- Si el objeto está en posesión de algún personaje
+    EsDestruido obj -> cEsDestruido (rec obj)       -- Si el objeto está destruido
   where rec = foldObjeto cObjeto cTomado cEsDestruido
 
 {-Ejercicio 2-}
-
 posición_personaje :: Personaje -> Posición
-posición_personaje = foldPersonaje const siguiente_posición id
+posición_personaje = foldPersonaje const siguiente_posición id 
 
 nombre_objeto :: Objeto -> String
 nombre_objeto = foldObjeto (flip const) const id
--- nombre_objeto = foldObjeto (flip(const)) const id ---- BORRAR VIEJO
 
 {-Ejercicio 3-}
-
+-- Aclaraciones: Incluimos los objetos destruidos y los personajes muertos en sus respectivas funciones.
 objetos_en :: Universo -> [Objeto]
---objetos_en u = [ x | Right x <- u ]
 objetos_en = map objeto_de . filter es_un_objeto
--- objetos_en = foldr (\x rec -> if es_un_objeto x then objeto_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
+{-
+Su reducción: objetos_en u = (map objeto_de . filter es_un_objeto) u = map objeto_de (filter es_un_objeto u)
+(filter es_un_objeto u) devolverá la lista filtrada de tipo [Either Persona Objeto] donde todos los elemento son de la forma (Right o) con o:: Objeto
+Para que sea de tipo [Objeto] aplicamos la función: map objeto_de :: [Either Persona Objeto] -> [Objeto] a la lista (filter es_un_objeto u).
+Notar que a cada elemento de (filter es_un_objeto u) se le puede aplicar objeto_de ya que, como dijimos, todos sus elementos son de la forma (Right o) con o:: Objeto.
+-}
 
 personajes_en :: Universo -> [Personaje]
--- personajes_en u = [ x | Left x <- u ]
-personajes_en = map personaje_de . filter es_un_personaje
--- personajes_en = foldr (\x rec -> if es_un_personaje x then personaje_de x : rec else rec) []  -- verisión Facu, capaz es mejor para la demostración
+personajes_en = map personaje_de . filter es_un_personaje  -- Análogo a objetos_en.
 
 {-Ejercicio 4-}
-
-objetos_en_posesión_de :: String -> Universo -> [Objeto]  -- Recibe el nombre de un personaje y un universo, devuelve la lista de objetos que le pertenecen
-objetos_en_posesión_de nom_per u = filter (en_posesión_de nom_per) (objetos_en u)
--- objetos_en_posesión_de nom_per u =  filter (\x -> en_posesión_de nom_per x) (objetos_en u)  ---- BORRAR VIEJO
+objetos_en_posesión_de :: String -> Universo -> [Objeto]  
+objetos_en_posesión_de nom_per u = filter (en_posesión_de nom_per) (objetos_en u)  -- Filtro los objetos del universo que están en posesión del personaje pasado.
 
 {-Ejercicio 5-}
-
--- Asume que hay al menos un objeto
+-- Aclaraciones: siempre voy a tener al menos un objeto libre y que no esté destruido.
 objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
-objeto_libre_mas_cercano p u = foldr1 (\x rec -> if objeto_libre x && distancia (Right x) (Left p) < distancia (Right rec) (Left p) then x else rec) (objetos_en u)
+objeto_libre_mas_cercano p u = foldr1 (\x rec -> if objeto_libre x && distancia (Right x) (Left p) < distancia (Right rec) (Left p) then x else rec) (objetos_en u)  -- Chequeo que mi objeto esté libre y si su distancia hacia el personaje es menor que la del resto de objetos la devuelvo.
 
 {-Ejercicio 6-}
-
+-- Aclaraciones: Thanos no puede tener más de 6 gemas.
 tiene_thanos_todas_las_gemas :: Universo -> Bool
-tiene_thanos_todas_las_gemas u = cant_elem_que_cumplen es_una_gema (objetos_en_posesión_de "Thanos" u) == 6 -- ¿ó >=6?
+tiene_thanos_todas_las_gemas u = cant_elem_que_cumplen es_una_gema (objetos_en_posesión_de "Thanos" u) == 6  -- Chequeo si la cantidad de gemas de Thanos es igual a 6.
 
 -- Dada una condición y una lista, devuelve la cantidad de elementos de la lista que cumplen esa condición.
 cant_elem_que_cumplen :: (a->Bool) -> [a] -> Int 
 cant_elem_que_cumplen cond = length . filter cond
 
 {-Ejercicio 7-}
-
-podemos_ganarle_a_thanos :: Universo -> Bool  --Falta testear!!!
-podemos_ganarle_a_thanos u = not (tiene_thanos_todas_las_gemas u) && (thor_win || wanda_vision_win)
+-- Aclaraciones: El enunciado piden que *estén* los personajes/objetos en el universo. No aclara nada sobre la necesidad de que estén vivos/no hayan sido destruidos.
+--               Consideramos que un personaje/objeto pertenece al universo sin importar que esté muerto/haya sido destruido.
+podemos_ganarle_a_thanos :: Universo -> Bool  
+podemos_ganarle_a_thanos u = not (tiene_thanos_todas_las_gemas u) && (thor_win || wanda_vision_win) -- Chequeo que Thanos no tenga las 6 gemas y que exista la posibilidad de vencerlo
   where
-    thor_win = está_el_personaje "Thor" u && está_el_objeto "Stormbreaker" u
-    wanda_vision_win = está_el_personaje "Wanda" u && está_el_personaje "Visión" u && en_posesión_de "Visión" (objeto_de_nombre "Gema de la mente" u)
+    thor_win = está_el_personaje "Thor" u && está_el_objeto "Stormbreaker" u  -- Chequeo que Thor pueda ganarle a Thanos
+    wanda_vision_win = está_el_personaje "Wanda" u && está_el_personaje "Visión" u && en_posesión_de "Visión" (objeto_de_nombre "Gema de la mente" u)  -- Chequeo que Wanda pueda matar a Vision cuando posee la gema de la mente
 
 
 {- Tests -}
