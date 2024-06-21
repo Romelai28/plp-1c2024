@@ -68,7 +68,6 @@ iesimo(I, [_|YS], X) :- iesimo(I2, YS, X), I is I2+1.
 % Item 1:
 
 
-
 % Item 2:
 % borrar(+ListaOriginal, +X, -ListaSinXs), que elimina todas las ocurrencias de X de la lista ListaOriginal.
 borrar([], _, []).                                                      % Caso base.
