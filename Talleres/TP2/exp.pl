@@ -46,8 +46,8 @@ vecino(pos(X,Y), T, V) :- Y1 is Y-1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % C
 
 % enRango(+Pos, ?T)
 % Cuando T no esta instanciado, genera infinitos (no todos) tableros en los que X, Y esten en rango.
-enRango(pos(X,Y), [T|TS]) :- length([T|TS], Long_X), 0 =< X, X < Long_X,
-                             length(T, Long_Y), 0=< Y, Y < Long_Y.
+enRango(pos(X,Y), T) :- n_filas(T, F), 0 =< X, X < F,
+                        n_columnas(T, C), 0 =< Y, Y < C.
 
 
 %% Ejercicio 4
@@ -100,8 +100,15 @@ camino2Aux(Inicio, Fin, Tablero, Camino, Iterador, Techo) :-
     camino2Aux(Inicio, Fin, Tablero, Camino, It2, Techo).
 
 
-% Completar especificación de instanciaciones de parametros.
+% Completar especificación de instanciaciones de parametros.  (Ahora lo escribi así nomas, faltan ver casos)
+
+% caminoLongFija(?Inicio, ?Fin, +Tablero, ?Camino, ?Longitud)
+% Cuando Inicio, Fin no esta instanciado, Camino esta instanciado y Longitud no esta instanciado, instancia Inicio, Fin con el inicio y el fin del camino, la Longitud se instancia correctamente. (false si el camino no era válido)
+% Cuando Camino no esta instanciado y Longitud no esta instanciado, instancia Camino y Longitud adecuadamente.
+% Cuando Camino no esta instanciado y Longitud esta instanciado, instancia Camino solo con los caminos de longitud Longitud.
+% Cuando Camino esta instanciado y Longitud no esta instanciado, instancia Longitud en la longitud del camino. (false si el camino no era válido)
 caminoLongFija(Inicio, Fin, Tablero, Camino, Longitud) :- camino(Inicio, Fin, Tablero, Camino), length(Camino, Longitud).
+
 
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
