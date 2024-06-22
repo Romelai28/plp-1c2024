@@ -1,3 +1,11 @@
+% Completar especificación de instanciaciones de parametros.
+n_filas(T, F) :- length(T, F).
+
+% Completar especificación de instanciaciones de parametros.
+n_columnas([Fila|_], C) :- length(Fila, C).
+
+
+
 % Ejercicio 1:
 
 % tablero(+Filas, +Columnas, -Tablero) 
@@ -67,6 +75,29 @@ caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
     not(member(V, Visitados)),
     caminoAux(V, Fin, T, [V|Visitados], Camino).
 
+%% Ejercicio 6
+%% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
+%% se instancien en orden creciente de longitud.
+camino2(Inicio , Fin, Tablero, Camino) :-
+    n_filas(Tablero, F), n_columnas(Tablero, C),
+    Techo is (F*C), camino2Aux(Inicio, Fin, Tablero, Camino, Techo, Techo).
+
+camino2Aux(Inicio, Fin, Tablero, Camino, Iterador, Techo) :-
+    0=< Iterador, Iterador =< Techo,
+    It2 is Iterador-1,
+    camino2Aux(Inicio, Fin, Tablero, Camino, It2, Techo).
+
+camino2Aux(Inicio, Fin, Tablero, Camino, Iterador, Techo) :-
+    0=< Iterador, Iterador =< Techo,
+    caminoLongFija(Inicio, Fin, Tablero, Camino, Iterador).
+
+caminoLongFija(Inicio, Fin, Tablero, Camino, Longitud) :- camino(Inicio, Fin, Tablero, Camino), length(Camino, N), N =:= Longitud.
+
+
+%% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
+%% cada caso por qué el predicado se comporta como lo hace.
+
+
 %% Ejercicio 8
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
 %% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
@@ -75,11 +106,11 @@ caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
     unionTableros(Tablero1, Tablero2, T),
     camino(Inicio, Fin, T, Camino).
 
-unionTableros([T1|TS1], [T2|TS2], TableroRes) :-
-    length([T1|TS1], F1), length([T2|TS2], F2),
+unionTableros(T1, T2, TableroRes) :-
+    n_filas(T1, F1), n_filas(T2, F2),
     F is min(F1, F2),
-    length(T1, C1), length(T2, C2),
+    n_columnas(T1, C1), n_columnas(T2, C2),
     C is min(C1, C2),
-    tablero(F, C, TableroRes),
+    tablero(F, C, TableroRes).
     % TERMINAR DE ESCRIBIR LA FUNCIÓN, QUEDA COPIAR LOS OCUPADO DE TABLERO1 A TABLERO RES Y COPIAR LOS OCUPADO DE TABLERO2 A TABLERO RES !!!
     
