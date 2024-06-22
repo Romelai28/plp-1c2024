@@ -14,9 +14,9 @@ crearFila(Largo, [X|Resto]) :- Largo > 0, Largo2 is Largo -1, crearFila(Largo2, 
 
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
-ocupar(pos(X,Y), T) :- nth0(X, T, Fila), nth0(Y, Fila, ocupado).
+ocupar(pos(X,Y), T) :- nth0(X, T, Fila), nth0(Y, Fila, ocupado).  % ocupar indirectamente checkea que este enRango por el nth0.
 
-
+% ejemplo:
 tablero(ej5x5, T) :-
 tablero(5, 5, T),
 ocupar(pos(1, 1), T),
@@ -67,3 +67,19 @@ caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
     not(member(V, Visitados)),
     caminoAux(V, Fin, T, [V|Visitados], Camino).
 
+%% Ejercicio 8
+%% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
+%% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
+%% sólo por celdas transitables de ambos tableros.
+caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
+    unionTableros(Tablero1, Tablero2, T),
+    camino(Inicio, Fin, T, Camino).
+
+unionTableros([T1|TS1], [T2|TS2], TableroRes) :-
+    length([T1|TS1], F1), length([T2|TS2], F2),
+    F is min(F1, F2),
+    length(T1, C1), length(T2, C2),
+    C is min(C1, C2),
+    tablero(F, C, TableroRes),
+    % TERMINAR DE ESCRIBIR LA FUNCIÓN, QUEDA COPIAR LOS OCUPADO DE TABLERO1 A TABLERO RES Y COPIAR LOS OCUPADO DE TABLERO2 A TABLERO RES !!!
+    
