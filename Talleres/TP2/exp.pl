@@ -28,15 +28,15 @@ ocupar(pos(1, 2), T).
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
-vecino(pos(X,Y), T, V) :- X1 is X+1, enRango(T, X1, Y), V = pos(X1, Y).  % Caso me voy abajo.
-vecino(pos(X,Y), T, V) :- X1 is X-1, enRango(T, X1, Y), V = pos(X1, Y).  % Caso me voy arriba.
-vecino(pos(X,Y), T, V) :- Y1 is Y+1, enRango(T, X, Y1), V = pos(X, Y1).  % Caso me voy derecha.
-vecino(pos(X,Y), T, V) :- Y1 is Y-1, enRango(T, X, Y1), V = pos(X, Y1).  % Caso me voy izquierda.
+vecino(pos(X,Y), T, V) :- X1 is X+1, enRango(pos(X1,Y), T), V = pos(X1, Y).  % Caso me voy abajo.
+vecino(pos(X,Y), T, V) :- X1 is X-1, enRango(pos(X1,Y), T), V = pos(X1, Y).  % Caso me voy arriba.
+vecino(pos(X,Y), T, V) :- Y1 is Y+1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % Caso me voy derecha.
+vecino(pos(X,Y), T, V) :- Y1 is Y-1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % Caso me voy izquierda.
 
-% enRango(?T, +X, +Y)
+% enRango(+Pos, ?T)
 % Cuando T no esta instanciado, genera infinitos (no todos) tableros en los que X, Y esten en rango.
-enRango([T|TS], X, Y) :- length([T|TS], Long_X), 0 =< X, X < Long_X,
-                         length(T, Long_Y), 0=< Y, Y < Long_Y.
+enRango(pos(X,Y), [T|TS]) :- length([T|TS], Long_X), 0 =< X, X < Long_X,
+                             length(T, Long_Y), 0=< Y, Y < Long_Y.
 
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
@@ -45,3 +45,25 @@ vecinoLibre(pos(X,Y), T, V) :- vecino(pos(X,Y), T, V), estaLibre(V, T).
 
 % estaLibre agregar especificación de los inputs!
 estaLibre(pos(X,Y), T) :- nth0(X, T, Fila), nth0(Y, Fila, Elem), not(atom(Elem)).
+
+
+%% Ejercicio 5
+%% camino(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea una lista
+%% [pos(F1,C1), pos(F2,C2),..., pos(Fn,Cn)] que denoten un camino desde Inicio
+%% hasta Fin pasando solo por celdas transitables.
+%% Además se espera que Camino no contenga ciclos.
+%% Notar que la cantidad de caminos es finita y por ende se tiene que poder recorrer
+%% todas las alternativas eventualmente.
+%% Consejo: Utilizar una lista auxiliar con las posiciones visitadas
+
+camino(Inicio, Fin, T, [Inicio|Camino]) :-
+    estaLibre(Inicio, T), estaLibre(Fin, T),  % estaLibre indirectamente checkea que este enRango por el nth0.
+    caminoAux(Inicio, Fin, T, [Inicio], Camino).
+
+
+caminoAux(Pos, Pos, T, Visitados, []).
+caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
+    vecinoLibre(Inicio, T, V),
+    not(member(V, Visitados)),
+    caminoAux(V, Fin, T, [V|Visitados], Camino).
+
