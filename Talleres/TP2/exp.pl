@@ -101,11 +101,18 @@ camino2Aux(Inicio, Fin, Tablero, Camino, Iterador, Techo) :-
 
 
 % Completar especificación de instanciaciones de parametros.
-caminoLongFija(Inicio, Fin, Tablero, Camino, Longitud) :- camino(Inicio, Fin, Tablero, Camino), length(Camino, N), N =:= Longitud.
-
+caminoLongFija(Inicio, Fin, Tablero, Camino, Longitud) :- camino(Inicio, Fin, Tablero, Camino), length(Camino, Longitud).
 
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
+
+
+%% Ejercicio 7
+%% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
+%% camino óptimo sobre Tablero entre Inicio y Fin. Notar que puede no ser único.
+caminoOptimo(Inicio, Fin, Tablero, Camino) :-
+    caminoLongFija(Inicio, Fin, Tablero, Camino, L),
+    not((caminoLongFija(Inicio, Fin, Tablero, Camino2, L2), L2 < L)).
 
 
 %% Ejercicio 8
