@@ -5,7 +5,16 @@
 %% Ejercicio 1
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
-tablero(_,_,_).
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sRevisar comportamiento cuando F ó C es 0
+tablero(0, C, []).
+tablero(F, C, [Fila|Res]) :- F>0, F2 is F-1, crearFila(C, Fila), tablero(F2, C, Res).
+
+% crearFila(+Largo, ?Lista)
+% Si Lista no esta instanciada, devuelve true sii la lista tiene longitud igual al Largo
+crearFila(0, []).
+crearFila(Largo, [X|Xs]) :- Largo > 0, Largo2 is Largo -1, crearFila(Largo2, Xs).
+
 
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
