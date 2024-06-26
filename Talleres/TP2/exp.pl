@@ -1,9 +1,9 @@
 % Completar especificación de instanciaciones de parametros.
-n_filas(T, F) :- length(T, F).
+cant_filas(T, F) :- length(T, F).
 
 
 % Completar especificación de instanciaciones de parametros.
-n_columnas([Fila|_], C) :- length(Fila, C).
+cant_columnas([Fila|_], C) :- length(Fila, C).
 
 
 % Ejercicio 1:
@@ -11,19 +11,32 @@ n_columnas([Fila|_], C) :- length(Fila, C).
 % tablero(+Filas, +Columnas, -Tablero) 
 % Instancia una estructura de tablero en blanco de Filas × Columnas, con todas las celdas libres.
 % Requiere que F > 0 && C > 0:
+
 tablero(0, C, []).
 tablero(F, C, [Fila|Res]) :- F>0, F2 is F-1, crearFila(C, Fila), tablero(F2, C, Res).
 
 
-% crearFila(+Largo, ?Lista)
+% crearFila(+Largo, ?Lista)ds
 % Si Lista no esta instanciada, devuelve true sii la lista tiene longitud igual al Largo
 crearFila(0, []).
-crearFila(Largo, [X|Resto]) :- Largo > 0, Largo2 is Largo -1, crearFila(Largo2, Resto).
+crearFila(Largo, [X|Resto]) :- Largo > 0, Largo2 is Largo-1, crearFila(Largo2, Resto).
 
 
 %% Ejercicio 2
 %% ocupar(+Pos, ?Tablero) será verdadero cuando la posición indicada esté ocupada.
-ocupar(pos(X,Y), T) :- nth0(X, T, Fila), nth0(Y, Fila, ocupado).  % ocupar indirectamente checkea que este enRango por el nth0.
+ocupar(pos(X,Y), T) :- nonvar(T), nth0(X, T, Fila), nth0(Y, Fila, ocupado).  % ocupar indirectamente checkea que este enRango por el nth0.
+ocupar(pos(X,Y), T) :- var(T), desde(2, Suma), paresQueSuman(F, C, Suma), tablero(F, C, T), ocupar(pos(X,Y), T).
+
+
+% desde(+X, -Y)  (Como en nuestro caso de uso el Suma no esta instanciado, usamos desde y no desde2)
+desde(X, X).
+desde(X, Y) :- N is X+1, desde(N, Y).
+
+
+% paresQueSuman(?A, ?B, +Total)
+% Por el contexto que la usamos, (A != 0 && B != 0)
+paresQueSuman(A, B, Total):-
+    S is Total-1, between(1, S, A), B is Total-A.
 
 
 % ejemplo:
@@ -46,8 +59,8 @@ vecino(pos(X,Y), T, V) :- Y1 is Y-1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % C
 
 % enRango(+Pos, ?T)
 % Cuando T no esta instanciado, genera infinitos (no todos) tableros en los que X, Y esten en rango.
-enRango(pos(X,Y), T) :- n_filas(T, F), 0 =< X, X < F,
-                        n_columnas(T, C), 0 =< Y, Y < C.
+enRango(pos(X,Y), T) :- cant_filas(T, F), 0 =< X, X < F,
+                        cant_columnas(T, C), 0 =< Y, Y < C.
 
 
 %% Ejercicio 4
@@ -85,8 +98,8 @@ caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
 camino2(Inicio , Fin, Tablero, Camino) :-
-    n_filas(Tablero, F), n_columnas(Tablero, C),
-    Techo is (F*C), between(0, Techo, L),
+    cant_filas(Tablero, F), cant_columnas(Tablero, C),
+    Techo is F*C, between(0, Techo, L),
     caminoLongFija(Inicio, Fin, Tablero, Camino, L).
 
 
