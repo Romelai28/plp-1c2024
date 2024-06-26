@@ -1,8 +1,10 @@
 % Completar especificación de instanciaciones de parametros.
+%cant_filas(+T, ?F)
 cant_filas(T, F) :- length(T, F).
 
 
 % Completar especificación de instanciaciones de parametros.
+%cant_filas(+T, ?C)
 cant_columnas([Fila|_], C) :- length(Fila, C).
 
 
@@ -16,7 +18,7 @@ tablero(0, C, []).
 tablero(F, C, [Fila|Res]) :- F>0, F2 is F-1, crearFila(C, Fila), tablero(F2, C, Res).
 
 
-% crearFila(+Largo, ?Lista)ds
+% crearFila(+Largo, ?Lista)
 % Si Lista no esta instanciada, devuelve true sii la lista tiene longitud igual al Largo
 crearFila(0, []).
 crearFila(Largo, [X|Resto]) :- Largo > 0, Largo2 is Largo-1, crearFila(Largo2, Resto).
@@ -25,7 +27,7 @@ crearFila(Largo, [X|Resto]) :- Largo > 0, Largo2 is Largo-1, crearFila(Largo2, R
 %% Ejercicio 2
 %% ocupar(+Pos, ?Tablero) será verdadero cuando la posición indicada esté ocupada.
 ocupar(pos(X,Y), T) :- nonvar(T), nth0(X, T, Fila), nth0(Y, Fila, ocupado).  % ocupar indirectamente checkea que este enRango por el nth0.
-ocupar(pos(X,Y), T) :- var(T), X>=0, Y>=0, desde(2, Suma), paresQueSuman(F, C, Suma), tablero(F, C, T), ocupar(pos(X,Y), T).
+ocupar(pos(X,Y), T) :- var(T), X>=0, Y>=0, desde(2, Suma), paresNatQueSuman(F, C, Suma), tablero(F, C, T), ocupar(pos(X,Y), T).
 
 
 % desde(+X, -Y)  (Como en nuestro caso de uso el Suma no esta instanciado, usamos desde y no desde2)
@@ -33,9 +35,9 @@ desde(X, X).
 desde(X, Y) :- N is X+1, desde(N, Y).
 
 
-% paresQueSuman(?A, ?B, +Total)
-% Por el contexto que la usamos, (A != 0 && B != 0)
-paresQueSuman(A, B, Total):-
+% paresNatQueSuman(?A, ?B, +Total)
+% Por el contexto que la usamos, solo considera los pares que cumplan (A >= 1 && B >= 1)
+paresNatQueSuman(A, B, Total):-
     S is Total-1, between(1, S, A), B is Total-A.
 
 
@@ -57,8 +59,7 @@ vecino(pos(X,Y), T, V) :- Y1 is Y+1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % C
 vecino(pos(X,Y), T, V) :- Y1 is Y-1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % Caso me voy izquierda.
 
 
-% enRango(+Pos, ?T)
-% Cuando T no esta instanciado, genera infinitos (no todos) tableros en los que X, Y esten en rango.
+% enRango(+Pos, +T)
 enRango(pos(X,Y), T) :- cant_filas(T, F), 0 =< X, X < F,
                         cant_columnas(T, C), 0 =< Y, Y < C.
 
@@ -66,11 +67,12 @@ enRango(pos(X,Y), T) :- cant_filas(T, F), 0 =< X, X < F,
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
 %% debe ser una celda transitable (no ocupada) en el Tablero
-vecinoLibre(pos(X,Y), T, V) :- vecino(pos(X,Y), T, V), estaLibre(V, T).
+vecinoLibre(pos(X,Y), Tablero, V) :- vecino(pos(X,Y), Tablero, V), estaLibre(V, Tablero).
 
 
 % Completar especificación de instanciaciones de parametros.
-estaLibre(pos(X,Y), T) :- nth0(X, T, Fila), nth0(Y, Fila, Elem), not(atom(Elem)).
+% estaLibre(?Pos, +T)
+estaLibre(pos(X,Y), Tablero) :- nth0(X, Tablero, Fila), nth0(Y, Fila, Elem), not(atom(Elem)).
 
 
 %% Ejercicio 5
@@ -82,16 +84,16 @@ estaLibre(pos(X,Y), T) :- nth0(X, T, Fila), nth0(Y, Fila, Elem), not(atom(Elem))
 %% todas las alternativas eventualmente.
 %% Consejo: Utilizar una lista auxiliar con las posiciones visitadas
 
-camino(Inicio, Fin, T, [Inicio|Camino]) :-
-    estaLibre(Inicio, T), estaLibre(Fin, T),  % estaLibre indirectamente checkea que este enRango por el nth0.
-    caminoAux(Inicio, Fin, T, [Inicio], Camino).
+camino(Inicio, Fin, Tablero, [Inicio|Camino]) :-
+    estaLibre(Inicio, Tablero), estaLibre(Fin, Tablero),  % estaLibre indirectamente checkea que este enRango por el nth0.
+    caminoAux(Inicio, Fin, Tablero, [Inicio], Camino).
 
 
-caminoAux(Pos, Pos, T, Visitados, []).
-caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
-    vecinoLibre(Inicio, T, V),
+caminoAux(Pos, Pos, Tablero, Visitados, []).
+caminoAux(Inicio, Fin, Tablero, Visitados, [V|Camino]) :-
+    vecinoLibre(Inicio, Tablero, V),
     not(member(V, Visitados)),
-    caminoAux(V, Fin, T, [V|Visitados], Camino).
+    caminoAux(V, Fin, Tablero, [V|Visitados], Camino).
 
 
 %% Ejercicio 6
@@ -99,7 +101,7 @@ caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
 %% se instancien en orden creciente de longitud.
 camino2(Inicio , Fin, Tablero, Camino) :-
     cant_filas(Tablero, F), cant_columnas(Tablero, C),
-    Techo is F*C, between(0, Techo, L),
+    Techo is F*C, between(1, Techo, L),
     caminoLongFija(Inicio, Fin, Tablero, Camino, L).
 
 
