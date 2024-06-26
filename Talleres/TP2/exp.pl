@@ -25,7 +25,7 @@ crearFila(Largo, [X|Resto]) :- Largo > 0, Largo2 is Largo-1, crearFila(Largo2, R
 %% Ejercicio 2
 %% ocupar(+Pos, ?Tablero) será verdadero cuando la posición indicada esté ocupada.
 ocupar(pos(X,Y), T) :- nonvar(T), nth0(X, T, Fila), nth0(Y, Fila, ocupado).  % ocupar indirectamente checkea que este enRango por el nth0.
-ocupar(pos(X,Y), T) :- var(T), desde(2, Suma), paresQueSuman(F, C, Suma), tablero(F, C, T), ocupar(pos(X,Y), T).
+ocupar(pos(X,Y), T) :- var(T), X>=0, Y>=0, desde(2, Suma), paresQueSuman(F, C, Suma), tablero(F, C, T), ocupar(pos(X,Y), T).
 
 
 % desde(+X, -Y)  (Como en nuestro caso de uso el Suma no esta instanciado, usamos desde y no desde2)
