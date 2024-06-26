@@ -111,22 +111,12 @@ caminoOptimo(Inicio, Fin, Tablero, Camino) :-
     caminoLongFija(Inicio, Fin, Tablero, Camino, L),
     not((caminoLongFija(Inicio, Fin, Tablero, Camino2, L2), L2 < L)).
 
+        
 
 %% Ejercicio 8
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
 %% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
 %% sólo por celdas transitables de ambos tableros.
 caminoDual(Inicio, Fin, Tablero1, Tablero2, Camino) :-
-    unionTableros(Tablero1, Tablero2, T),
-    camino(Inicio, Fin, T, Camino).
-
-
-% Completar especificación de instanciaciones de parametros.
-unionTableros(T1, T2, TableroRes) :-
-    n_filas(T1, F1), n_filas(T2, F2),
-    F is min(F1, F2),
-    n_columnas(T1, C1), n_columnas(T2, C2),
-    C is min(C1, C2),
-    tablero(F, C, TableroRes).
-    % TERMINAR DE ESCRIBIR LA FUNCIÓN, QUEDA COPIAR LOS OCUPADO DE TABLERO1 A TABLERO RES Y COPIAR LOS OCUPADO DE TABLERO2 A TABLERO RES !!!
+        camino(Inicio, Fin, Tablero1, Camino), camino(Inicio, Fin, Tablero2, Camino).
     
