@@ -86,18 +86,8 @@ caminoAux(Inicio, Fin, T, Visitados, [V|Camino]) :-
 %% se instancien en orden creciente de longitud.
 camino2(Inicio , Fin, Tablero, Camino) :-
     n_filas(Tablero, F), n_columnas(Tablero, C),
-    Techo is (F*C), camino2Aux(Inicio, Fin, Tablero, Camino, 0, Techo).
-
-
-% Completar especificación de instanciaciones de parametros.
-camino2Aux(Inicio, Fin, Tablero, Camino, Iterador, Techo) :-
-    0=< Iterador, Iterador =< Techo,
-    caminoLongFija(Inicio, Fin, Tablero, Camino, Iterador).
-
-camino2Aux(Inicio, Fin, Tablero, Camino, Iterador, Techo) :-
-    0=< Iterador, Iterador =< Techo,
-    It2 is Iterador+1,
-    camino2Aux(Inicio, Fin, Tablero, Camino, It2, Techo).
+    Techo is (F*C), between(0, Techo, L),
+    caminoLongFija(Inicio, Fin, Tablero, Camino, L).
 
 
 % Completar especificación de instanciaciones de parametros.  (Ahora lo escribi así nomas, faltan ver casos)
