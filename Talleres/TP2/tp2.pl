@@ -227,6 +227,15 @@ tablero(ej4x5, T) :-
 %% _ # _ _ _
 %% _ _ _ _ _
 
+% borrar(+ListaOriginal, +X, -ListaSinXs), que elimina todas las ocurrencias de X de la lista ListaOriginal.
+borrar([], _, []).                                                      % Caso base.
+borrar([X|XS], X, ListaSinXs) :- borrar(XS, X, ListaSinXs).             % Caso recursivo: Si la cabeza es el elemento que queremos eliminar.
+borrar([Y|YS], X, [Y|ListaSinXs]) :- X\=Y, borrar(YS, X, ListaSinXs).   % Caso recursivo: Si la cabeza NO es el elemento que queremos eliminar.
+
+% sacarDuplicados(+L1, -L2), que saca todos los elementos duplicados de la lista L1.
+sacarDuplicados([], []).
+sacarDuplicados([X|XS], [X|L2]) :- borrar(XS, X, ListaFiltrada), sacarDuplicados(ListaFiltrada, L2).
+
 
 cantidadTestsTablero(5). % Actualizar con la cantidad de tests que entreguen
 testTablero(1) :- tablero(0,0,[]). 
@@ -247,7 +256,8 @@ testVecino(5) :- vecinoLibre(pos(1,1), [[_,_]], pos(0,1)).
 
 % Agregar más tests
 
-cantidadTestsCamino(10). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsCamino(24). % Actualizar con la cantidad de tests que entreguen
+%% Camino:
 testCamino(1) :- tablero(ej5x5, T), bagof(Camino, (camino(pos(0,0), pos(2,3), T, Camino)), CaminoS), length(CaminoS, Longitud), Longitud == 287.
 testCamino(2) :- tablero(pared, T), not(camino(pos(0,0), pos(2,2), T, C)).  %% Camino imposible: porque debe cruzar la pared.
 testCamino(3) :- tablero(2, 2, T), not(camino(pos(1,1), pos(2,2), T, C)).  %% No existe un camino que empiece dentro del tablero y termine en una posición de afuera.
@@ -260,6 +270,17 @@ testCamino(10) :- tablero(ej4x5, T), camino(pos(0,0), pos(0,0), T, [pos(0,0)]). 
 testCamino(11) :- tablero(ej5x5, T), camino(pos(3,3), pos(2,1), T, [pos(3,3), pos(3,2), pos(3,1), pos(2,1)]).  %% Camino optimo.
 testCamino(12) :- tablero(ej5x5, T), camino(pos(3,3), pos(2,1), T, [pos(4,3), pos(4,4), pos(3,4), pos(3,3), pos(3,2), pos(3,1), pos(2,1)]). %% Camino no optimo.
 
+%% No hay casilleros repetidos en Camino.
+testCamino(25) :-
+    tablero(ej5x5, T),
+    camino(pos(3,3), pos(2,1), T, Camino),
+    length(Camino, L),
+    sacarDuplicados(Camino, CaminoSinRepes),
+    length(CaminoSinRepes, L1),
+    L == L1.
+
+
+%% camino2:
 testCamino(13) :- tablero(ej5x5, T), bagof(Camino, (camino2(pos(0,0), pos(2,3), T, Camino)), CaminoS), length(CaminoS, Longitud), Longitud == 287.
 
 %% Testea que se cumpla la propiedad de camino2 de dar los caminos de manera creciente creciente en longitudes. 
@@ -285,17 +306,41 @@ testCamino(22) :- tablero(ej4x5, T), camino(pos(0,0), pos(0,0), T, [pos(0,0)]). 
 testCamino(23) :- tablero(ej5x5, T), camino(pos(3,3), pos(2,1), T, [pos(3,3), pos(3,2), pos(3,1), pos(2,1)]).  %% Camino optimo.
 testCamino(24) :- tablero(ej5x5, T), camino(pos(3,3), pos(2,1), T, [pos(4,3), pos(4,4), pos(3,4), pos(3,3), pos(3,2), pos(3,1), pos(2,1)]). %% Camino no optimo.
 
+%% No hay casilleros repetidos en Camino.
+testCamino(26) :-
+    tablero(ej5x5, T),
+    camino2(pos(3,3), pos(2,1), T, Camino),
+    length(Camino, L),
+    sacarDuplicados(Camino, CaminoSinRepes),
+    length(CaminoSinRepes, L1),
+    L == L1.
 
 
-cantidadTestsCaminoOptimo(4). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsCaminoOptimo(13). % Actualizar con la cantidad de tests que entreguen
 testCaminoOptimo(1) :- tablero(ej5x5, T), caminoOptimo(pos(3,3), pos(2,1), T, Camino), length(Camino, 4).  %% No tiene casillas ocupadas en el camino directo.
 testCaminoOptimo(2) :- tablero(ej5x5, T), caminoOptimo(pos(3,3), pos(2,1), T, [pos(3,3), pos(3,2), pos(3,1), pos(2,1)]).
-
 testCaminoOptimo(3) :- tablero(ej5x5, T), caminoOptimo(pos(1,3), pos(1,0), T, Camino), length(Camino, 6).  %% Tiene que desviarse del camino directo para evitar las casillas ocupadas.
-testCaminoOptimo(4) :- tablero(pared, T), not(caminoOptimo(pos(0,0), pos(2,2), T, C)).                     %% Camino imposible porque debe cruzar la pared.
 
+testCaminoOptimo(2) :- tablero(pared, T), not(caminoOptimo(pos(0,0), pos(2,2), T, C)).  %% Camino imposible: porque debe cruzar la pared.
+testCaminoOptimo(3) :- tablero(2, 2, T), not(caminoOptimo(pos(1,1), pos(2,2), T, C)).  %% No existe un camino que empiece dentro del tablero y termine en una posición de afuera.
+testCaminoOptimo(4) :- tablero(2, 2, T), not(caminoOptimo(pos(3,2), pos(0,0), T, C)).  %% No existe un camino que empiece fuera del tablero y comience en una posición de afuera.
+testCaminoOptimo(6) :- tablero(ej4x5, T), not(caminoOptimo(pos(1,3), pos(0,0), T, Camino)).  %% Camino imposible: empieza en una casilla ocupada.
+testCaminoOptimo(7) :- tablero(ej4x5, T), not(caminoOptimo(pos(0,0), pos(1,3), T, Camino)).  %% Camino imposible: termina en una casilla ocupada.
+testCaminoOptimo(8) :- tablero(ej4x5, T), not(caminoOptimo(pos(2,1), pos(1,3), T, Camino)).  %% Camino imposible: empieza y termina en una casila ocupada.
+testCaminoOptimo(9) :- tablero(ej4x5, T), not(caminoOptimo(pos(1,3), pos(1,3), T, Camino)).  %% Camino imposible: camino a si mismo, caso ocupado.
+testCaminoOptimo(10) :- tablero(ej4x5, T), caminoOptimo(pos(0,0), pos(0,0), T, [pos(0,0)]).  %% Camino posible: camino a si mismo, caso libre.
+testCaminoOptimo(11) :- tablero(ej5x5, T), caminoOptimo(pos(3,3), pos(2,1), T, [pos(3,3), pos(3,2), pos(3,1), pos(2,1)]).  %% Camino optimo.
+testCaminoOptimo(12) :- tablero(ej5x5, T), not(caminoOptimo(pos(3,3), pos(2,1), T, [pos(4,3), pos(4,4), pos(3,4), pos(3,3), pos(3,2), pos(3,1), pos(2,1)])). %% Camino no optimo.
 
-% testCaminoOptimo(5) :- tablero(ej5x5, T), not(camino(pos(1,3), pos(0,0), T, Camino)).
+%% No hay casilleros repetidos en Camino.
+testCaminoOptimo(13) :-
+    tablero(ej5x5, T),
+    caminoOptimo(pos(3,3), pos(2,1), T, Camino),
+    length(Camino, L),
+    sacarDuplicados(Camino, CaminoSinRepes),
+    length(CaminoSinRepes, L1),
+    L == L1.
+
 
 
 cantidadTestsCaminoDual(1). % Actualizar con la cantidad de tests que entreguen
