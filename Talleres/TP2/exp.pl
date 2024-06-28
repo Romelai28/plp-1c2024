@@ -53,6 +53,7 @@ ocupar(pos(1, 2), T).
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
+
 vecino(pos(X,Y), T, V) :- X1 is X+1, enRango(pos(X1,Y), T), V = pos(X1, Y).  % Caso me voy abajo.
 vecino(pos(X,Y), T, V) :- X1 is X-1, enRango(pos(X1,Y), T), V = pos(X1, Y).  % Caso me voy arriba.
 vecino(pos(X,Y), T, V) :- Y1 is Y+1, enRango(pos(X,Y1), T), V = pos(X, Y1).  % Caso me voy derecha.
