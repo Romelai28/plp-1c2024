@@ -1,11 +1,8 @@
 % Auxiliares:
 
-% desde(+X, -N)
-desde(X, X).
-desde(X, Y) :- N is X+1, desde(N, Y).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 % Ejercicio 4:
 
@@ -137,4 +134,32 @@ repartoSinVaciasPrima(L, N, [I|LListas]) :-
 % Ejercicio 9:
 
 % elementosTomadosEnOrden(+L,+N,-Elementos) que tenga éxito si L es una lista, N ≥ 0 y Elementos es una lista de N elementos de L, preservando el orden en que aparecen en la lista original.
+% PENDIENTE
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Ejercicio 10:
+
+% desde(+X, -Y)
+desde(X, X).
+desde(X, Y) :- N is X+1, desde(N, Y).
+
+% i. ¿Cómo deben instanciarse los parámetros para que el predicado funcione? (Es decir, para que no se cuelgue ni produzca un error). ¿Por qué?
+
+% Deben instanciarse: desde(+X, -Y)
+% X debe estar instanciada pues hacemos una operación aritmetica con ella cuando "N is X+1".
+% Y debe estar sin instanciar. Si la pasamos instanciada, al pedir más soluciones se colgara, ya que intentará con desde(X+1, Y), desde(X+2, Y), desde(X+3, Y), ...
+% creciendo infinitamente, habremos entrado en una resolución infinita.
+
+% ii. Dar una nueva versión del predicado que funcione con la instanciación desde2(+X,?Y), tal que
+%     si Y está instanciada, sea verdadero si Y es mayor o igual que X, y si no lo está genere todos los Y de X en adelante.
+
+% desde2(+X, ?Y)
+desde2(X, X).
+desde2(X, Y) :- var(Y), N is X+1, desde2(N, Y).
+desde2(X, Y) :- nonvar(Y), X<Y.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Ejercicio 11:
 
